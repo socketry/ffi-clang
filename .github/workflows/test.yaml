@@ -8,33 +8,45 @@ permissions:
 jobs:
   test:
     name: ${{matrix.ruby}} on ${{matrix.os}}
-    runs-on: ${{matrix.os}}-latest
+    runs-on: ${{matrix.os}}
     continue-on-error: ${{matrix.experimental}}
-    
+
     strategy:
+      fail-fast: false
       matrix:
-        os:
-          - ubuntu
-        
-        ruby:
-          - "4.0"
-          - "3.2"
-          - "3.3"
-          - "3.4"
-          - "head"
-        
-        experimental: [false]
-    
+        include:
+          # Ubuntu - full Ruby matrix
+          - { os: ubuntu-latest, ruby: "3.2", experimental: false }
+          - { os: ubuntu-latest, ruby: "3.3", experimental: false }
+          - { os: ubuntu-latest, ruby: "3.4", experimental: false }
+          - { os: ubuntu-latest, ruby: "4.0", experimental: false }
+          - { os: ubuntu-latest, ruby: "head", experimental: false }
+          # macOS
+          - { os: macos-latest, ruby: "4.0", experimental: true }
+          # Windows MinGW
+          - { os: windows-latest, ruby: "4.0", experimental: true }
+          # Windows MSVC
+          - { os: windows-latest, ruby: mswin, experimental: true }
+
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{matrix.ruby}}
         bundler-cache: true
-    
-    - name: Install LLVM and Clang
+
+    - name: Install LLVM and Clang (Ubuntu)
+      if: runner.os == 'Linux'
       run: sudo apt-get install -y llvm llvm-dev clang libclang1 libclang-dev
-    
+
+    - name: Install LLVM and Clang (Windows MinGW)
+      if: runner.os == 'Windows' && matrix.ruby != 'mswin'
+      run: pacman -S --noconfirm mingw-w64-ucrt-x86_64-clang mingw-w64-ucrt-x86_64-llvm
+
+    - name: Set up MSVC
+      if: runner.os == 'Windows' && matrix.ruby == 'mswin'
+      uses: ilammy/msvc-dev-cmd@v1
+
     - name: Run tests
       timeout-minutes: 10
       run: bundle exec bake test
