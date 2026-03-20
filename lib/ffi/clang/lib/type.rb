@@ -42,6 +42,17 @@ module FFI
 				:type_obj_c_id, 27,
 				:type_obj_c_class, 28,
 				:type_obj_c_sel, 29,
+				:type_float128, 30,
+				:type_half, 31,
+				:type_float16, 32,
+				:type_short_accum, 33,
+				:type_accum, 34,
+				:type_long_accum, 35,
+				:type_ushort_accum, 36,
+				:type_uaccum, 37,
+				:type_ulong_accum, 38,
+				:type_bfloat16, 39,
+				:type_ibm128, 40,
 				:type_complex, 100,
 				:type_pointer, 101,
 				:type_block_pointer, 102,
@@ -124,7 +135,10 @@ module FFI
 				:type_ocl_intel_subgroup_avc_ime_dual_ref_streamin, 175,
 				:type_ext_vector, 176,
 				:type_atomic, 177,
-				:type_btf_tag_attributed, 178
+				:type_btf_tag_attributed, 178,
+				:type_hlsl_resource, 179,
+				:type_hlsl_attributed_resource, 180,
+				:type_hlsl_inline_spirv, 181
 			]
 			
 			enum :calling_conv, [
