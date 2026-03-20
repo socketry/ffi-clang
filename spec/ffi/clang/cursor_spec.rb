@@ -1485,6 +1485,14 @@ describe FFI::Clang::Cursor do
 			ancestors = method_cursor.ancestors_by_kind(:cursor_namespace)
 			expect(ancestors).to eq([])
 		end
+
+		it "finds ancestors at multiple levels" do
+			nested = find_matching(cursor_cxx) do |child, parent|
+				child.spelling == "Nested" and parent.spelling == "Inner"
+			end
+			ancestors = nested.ancestors_by_kind(:cursor_namespace)
+			expect(ancestors.map(&:spelling)).to eq(["Inner", "Outer"])
+		end
 	end
 	
 	describe "#printing_policy" do

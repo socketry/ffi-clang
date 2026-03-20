@@ -476,13 +476,13 @@ module FFI
 			# @returns [Array(Cursor)] Array of ancestor cursors matching the kinds.
 			def ancestors_by_kind(*kinds)
 				result = Array.new
-				
-				parent = self
-				while parent != self.semantic_parent
-					parent = self.semantic_parent
+
+				parent = self.semantic_parent
+				while parent.kind != :cursor_translation_unit
 					if kinds.include?(parent.kind)
 						result << parent
 					end
+					parent = parent.semantic_parent
 				end
 				result
 			end
