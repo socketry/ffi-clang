@@ -47,10 +47,11 @@ module FFI
 			# Iterate over each token.
 			# @yields {|token| ...} Each token in the collection.
 			# 	@parameter token [Token] The token.
+			# @returns [Enumerator] If no block is given.
 			def each(&block)
-				@tokens.each do |token|
-					block.call(token)
-				end
+				return to_enum(__method__) unless block_given?
+				
+				@tokens.each(&block)
 			end
 			
 			# Get cursors corresponding to each token.

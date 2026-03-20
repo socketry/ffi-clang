@@ -47,10 +47,11 @@ module FFI
 				# Iterate over each completion result.
 				# @yields {|result| ...} Each completion result.
 				# 	@parameter result [Result] The completion result.
+				# @returns [Enumerator] If no block is given.
 				def each(&block)
-					@results.each do |token|
-						block.call(token)
-					end
+					return to_enum(__method__) unless block_given?
+					
+					@results.each(&block)
 				end
 				
 				# Get the number of diagnostics.

@@ -44,6 +44,12 @@ describe CodeCompletion do
 			results.each {spy.stub}
 		end
 		
+		it "#each returns an Enumerator if no block is given" do
+			enumerator = results.each
+			expect(enumerator).to be_kind_of(Enumerator)
+			expect(enumerator.to_a).to eq(results.results)
+		end
+		
 		it "#num_diagnostics" do
 			expect(results.num_diagnostics).to eq(2)
 		end

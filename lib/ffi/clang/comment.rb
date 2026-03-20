@@ -107,10 +107,15 @@ module FFI
 			# Iterate over all child comments.
 			# @yields {|comment| ...} Yields each child comment.
 			# 	@parameter comment [Comment] The child comment.
+			# @returns [Enumerator] If no block is given.
 			def each(&block)
-				num_children.times.map do |i|
+				return to_enum(__method__) unless block_given?
+				
+				num_children.times do |i|
 					block.call(child(i))
 				end
+				
+				self
 			end
 		end
 		

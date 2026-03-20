@@ -85,6 +85,12 @@ describe CompilationDatabase do
 				expect(spy).to receive(:stub).exactly(commands.size).times
 				commands.each {spy.stub}
 			end
+			
+			it "returns an Enumerator if no block is given" do
+				enumerator = commands.each
+				expect(enumerator).to be_kind_of(Enumerator)
+				expect(enumerator.to_a.map(&:filename)).to eq(commands.commands.map(&:filename))
+			end
 		end
 	end
 	

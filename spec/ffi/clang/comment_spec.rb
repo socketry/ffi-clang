@@ -49,6 +49,12 @@ describe Comment do
 		expect(para.text).to eq(" This is a longer explanation\n that spans multiple lines")
 	end
 	
+	it "#each returns an Enumerator if no block is given" do
+		enumerator = comment.each
+		expect(enumerator).to be_kind_of(Enumerator)
+		expect(enumerator.to_a.map(&:kind)).to eq(comment.children.map(&:kind))
+	end
+	
 	it "understands params" do
 		[["input", " some input\n "], ["flags", " some flags\n "]].each_with_index do |v, child_idx|
 			param = comment.child(3 + child_idx)

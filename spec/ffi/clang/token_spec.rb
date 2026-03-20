@@ -30,6 +30,12 @@ describe Tokens do
 		tokens.each {spy.stub}
 	end
 	
+	it "#each returns an Enumerator if no block is given" do
+		enumerator = tokens.each
+		expect(enumerator).to be_kind_of(Enumerator)
+		expect(enumerator.to_a).to eq(tokens.tokens)
+	end
+	
 	it "#cursors" do
 		expect(tokens.cursors).to be_kind_of(Array)
 		expect(tokens.cursors.size).to eq(tokens.size)

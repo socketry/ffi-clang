@@ -85,10 +85,15 @@ module FFI
 				# Iterate over each compile command.
 				# @yields {|command| ...} Each compile command.
 				# 	@parameter command [CompileCommand] The compile command.
+				# @returns [Enumerator] If no block is given.
 				def each(&block)
-					size.times.map do |i|
+					return to_enum(__method__) unless block_given?
+					
+					size.times do |i|
 						block.call(command(i))
 					end
+					
+					self
 				end
 			end
 			
