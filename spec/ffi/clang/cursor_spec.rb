@@ -11,6 +11,39 @@
 # Copyright, 2019, by Michael Metivier.
 # Copyright, 2023-2025, by Charlie Savage.
 
+describe FFI::Clang::Lib::CXCursor do
+	let(:cursor) {described_class.new}
+	
+	describe "cursor kind mapping" do
+		it "maps corrected expression kinds" do
+			cursor[:kind] = 129
+			expect(cursor[:kind]).to eq(:cursor_cxx_typeid_expr)
+			
+			cursor[:kind] = 152
+			expect(cursor[:kind]).to eq(:cursor_cxx_addrspace_cast_expr)
+			
+			cursor[:kind] = 156
+			expect(cursor[:kind]).to eq(:cursor_pack_indexing_expr)
+		end
+		
+		it "maps newly added statement kinds" do
+			cursor[:kind] = 288
+			expect(cursor[:kind]).to eq(:cursor_omp_tile_directive)
+			
+			cursor[:kind] = 300
+			expect(cursor[:kind]).to eq(:cursor_omp_parallel_masked_directive)
+			
+			cursor[:kind] = 333
+			expect(cursor[:kind]).to eq(:cursor_open_acc_cache_construct)
+		end
+		
+		it "maps newly added extra declaration kinds" do
+			cursor[:kind] = 604
+			expect(cursor[:kind]).to eq(:cursor_concept_decl)
+		end
+	end
+end
+
 describe "Function Call Cursors" do
 	let(:translation_unit) {Index.new.parse_translation_unit(fixture_path("class.cpp"))}
 	let(:cursor) {translation_unit.cursor}
