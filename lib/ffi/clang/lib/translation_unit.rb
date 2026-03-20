@@ -96,7 +96,10 @@ module FFI
 			# Source code translation units:
 			attach_function :parse_translation_unit, :clang_parseTranslationUnit, [:CXIndex, :string, :pointer, :int, :pointer, :uint, :uint], :CXTranslationUnit
 			attach_function :parse_translation_unit2, :clang_parseTranslationUnit2, [:CXIndex, :string, :pointer, :int, :pointer, :uint, :uint, :pointer], ErrorCodes
+			attach_function :parse_translation_unit2_full_argv, :clang_parseTranslationUnit2FullArgv, [:CXIndex, :string, :pointer, :int, :pointer, :uint, :uint, :pointer], ErrorCodes
+			attach_function :create_translation_unit_from_source_file, :clang_createTranslationUnitFromSourceFile, [:CXIndex, :string, :int, :pointer, :uint, :pointer], :CXTranslationUnit
 			attach_function :create_translation_unit, :clang_createTranslationUnit, [:CXIndex, :string], :CXTranslationUnit
+			attach_function :create_translation_unit2, :clang_createTranslationUnit2, [:CXIndex, :string, :pointer], ErrorCodes
 			attach_function :dispose_translation_unit, :clang_disposeTranslationUnit, [:CXTranslationUnit], :void
 			attach_function :get_translation_unit_spelling, :clang_getTranslationUnitSpelling, [:CXTranslationUnit], CXString.by_value
 			

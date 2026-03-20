@@ -43,28 +43,22 @@ module FFI
 			# @parameter source_file [String] The path to the source file to parse.
 			# @parameter command_line_args [Array(String) | String | Nil] Compiler arguments for parsing.
 			# @parameter unsaved [Array(UnsavedFile)] Unsaved file buffers.
-			# @parameter opts [Hash] Parsing options as a hash of flags.
+			# @parameter opts [Array(Symbol)] Parsing options as an array of flags.
 			# @returns [TranslationUnit] The parsed translation unit.
 			# @raises [Error] If parsing fails.
 			def parse_translation_unit(source_file, command_line_args = nil, unsaved = [], opts = {})
-				command_line_args = Array(command_line_args)
-				
-				# Inject -resource-dir if libclang can't find it on its own:
-				command_line_args = command_line_args + Lib.args.command_line_args(command_line_args)
-				
-				unsaved_files = UnsavedFile.unsaved_pointer_from(unsaved)
-				
-				translation_unit_pointer_out = FFI::MemoryPointer.new(:pointer)
-				
-				error_code = Lib.parse_translation_unit2(self, source_file, args_pointer_from(command_line_args), command_line_args.size, unsaved_files, unsaved.length, options_bitmask_from(opts), translation_unit_pointer_out)
-				if error_code != :cx_error_success
-					error_name = Lib::ErrorCodes.from_native(error_code, nil)
-					message = "Error parsing file. Code: #{error_name}. File: #{source_file.inspect}"
-					raise(Error, message)
-				end
-				
-				translation_unit_pointer = translation_unit_pointer_out.read_pointer
-				TranslationUnit.new translation_unit_pointer, self
+				parse_translation_unit_with(:parse_translation_unit2, source_file, command_line_args, unsaved, opts)
+			end
+			
+			# Parse a source file using a full compiler command line including argv[0].
+			# @parameter source_file [String] The path to the source file to parse.
+			# @parameter command_line_args [Array(String) | String | Nil] Full compiler arguments including argv[0].
+			# @parameter unsaved [Array(UnsavedFile)] Unsaved file buffers.
+			# @parameter opts [Array(Symbol)] Parsing options as an array of flags.
+			# @returns [TranslationUnit] The parsed translation unit.
+			# @raises [Error] If parsing fails.
+			def parse_translation_unit_with_invocation(source_file, command_line_args = nil, unsaved = [], opts = {})
+				parse_translation_unit_with(:parse_translation_unit2_full_argv, source_file, command_line_args, unsaved, opts)
 			end
 			
 			# Create a translation unit from a precompiled AST file.
@@ -77,11 +71,38 @@ module FFI
 				TranslationUnit.new translation_unit_pointer, self
 			end
 			
+			# Create a translation unit from a precompiled AST file with detailed error reporting.
+			# @parameter ast_filename [String] The path to the AST file.
+			# @returns [TranslationUnit] The loaded translation unit.
+			# @raises [Error] If loading the AST file fails.
+			def create_translation_unit2(ast_filename)
+				translation_unit_pointer_out = MemoryPointer.new(:pointer)
+				error_code = Lib.create_translation_unit2(self, ast_filename, translation_unit_pointer_out)
+				translation_unit_from_error_code(error_code, ast_filename, translation_unit_pointer_out)
+			end
+			
+			# Create a translation unit directly from source and compiler arguments.
+			# @parameter source_file [String] The path to the source file to parse.
+			# @parameter command_line_args [Array(String) | String | Nil] Compiler arguments for parsing.
+			# @parameter unsaved [Array(UnsavedFile)] Unsaved file buffers.
+			# @returns [TranslationUnit] The parsed translation unit.
+			# @raises [Error] If parsing fails.
+			def create_translation_unit_from_source_file(source_file, command_line_args = nil, unsaved = [])
+				command_line_args = normalized_command_line_args(command_line_args)
+				args_pointer, _strings = args_pointer_from(command_line_args)
+				unsaved_files = UnsavedFile.unsaved_pointer_from(unsaved)
+				
+				translation_unit_pointer = Lib.create_translation_unit_from_source_file(self, source_file, command_line_args.length, args_pointer, unsaved.length, unsaved_files)
+				raise Error, "error parsing #{source_file.inspect}" if translation_unit_pointer.null?
+				
+				TranslationUnit.new translation_unit_pointer, self
+			end
+			
 			private
 			
 			# Convert command line arguments to a pointer array for libclang.
 			# @parameter command_line_args [Array(String)] The command line arguments.
-			# @returns [FFI::MemoryPointer] A pointer to the arguments array.
+			# @returns [Array(FFI::MemoryPointer, Array(FFI::MemoryPointer))] The pointer array and string buffers that back it.
 			def args_pointer_from(command_line_args)
 				args_pointer = MemoryPointer.new(:pointer, command_line_args.length)
 				
@@ -90,14 +111,57 @@ module FFI
 				end
 				
 				args_pointer.put_array_of_pointer(0, strings) unless strings.empty?
-				args_pointer
+				return args_pointer, strings
 			end
 			
-			# Convert options hash to a bitmask for libclang.
-			# @parameter opts [Hash] The options hash.
+			# Normalize command line arguments and inject libclang support flags.
+			# @parameter command_line_args [Array(String) | String | Nil] Compiler arguments for parsing.
+			# @returns [Array(String)] The normalized compiler arguments.
+			def normalized_command_line_args(command_line_args)
+				command_line_args = Array(command_line_args)
+				
+				# Inject -resource-dir if libclang can't find it on its own:
+				command_line_args + Lib.args.command_line_args(command_line_args)
+			end
+			
+			# Parse a translation unit through a specific libclang entry point.
+			# @parameter function_name [Symbol] The low-level parse function to invoke.
+			# @parameter source_file [String] The path to the source file to parse.
+			# @parameter command_line_args [Array(String) | String | Nil] Compiler arguments for parsing.
+			# @parameter unsaved [Array(UnsavedFile)] Unsaved file buffers.
+			# @parameter opts [Array(Symbol)] Parsing options as an array of flags.
+			# @returns [TranslationUnit] The parsed translation unit.
+			# @raises [Error] If parsing fails.
+			def parse_translation_unit_with(function_name, source_file, command_line_args, unsaved, opts)
+				command_line_args = normalized_command_line_args(command_line_args)
+				args_pointer, _strings = args_pointer_from(command_line_args)
+				unsaved_files = UnsavedFile.unsaved_pointer_from(unsaved)
+				translation_unit_pointer_out = FFI::MemoryPointer.new(:pointer)
+				
+				error_code = Lib.send(function_name, self, source_file, args_pointer, command_line_args.size, unsaved_files, unsaved.length, options_bitmask_from(opts), translation_unit_pointer_out)
+				translation_unit_from_error_code(error_code, source_file, translation_unit_pointer_out)
+			end
+			
+			# Convert options to a bitmask for libclang.
+			# @parameter opts [Array(Symbol)] The option flags.
 			# @returns [Integer] The bitmask representing the options.
 			def options_bitmask_from(opts)
 				Lib.bitmask_from(Lib::TranslationUnitFlags, opts)
+			end
+			
+			# Build a translation unit from a libclang error code and output pointer.
+			# @parameter error_code [Symbol] The libclang error code.
+			# @parameter source_file [String] The path that was being parsed or loaded.
+			# @parameter translation_unit_pointer_out [FFI::MemoryPointer] The output pointer for the translation unit.
+			# @returns [TranslationUnit] The created translation unit.
+			# @raises [Error] If the low-level call fails.
+			def translation_unit_from_error_code(error_code, source_file, translation_unit_pointer_out)
+				if error_code != :cx_error_success
+					raise(Error, "Error parsing file. Code: #{error_code}. File: #{source_file.inspect}")
+				end
+				
+				translation_unit_pointer = translation_unit_pointer_out.read_pointer
+				TranslationUnit.new translation_unit_pointer, self
 			end
 		end
 	end
