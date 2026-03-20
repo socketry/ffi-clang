@@ -416,6 +416,40 @@ module FFI
 				Lib.get_template_cursor_kind @cursor
 			end
 			
+			# Get the number of template arguments for a template specialization cursor.
+			# @returns [Integer] The number of template arguments, or `-1` if the cursor is not a template specialization.
+			def num_template_arguments
+				Lib.cursor_get_num_template_arguments(@cursor)
+			end
+			
+			# Get the kind of a template argument for a template specialization cursor.
+			# @parameter index [Integer] The zero-based template argument index.
+			# @returns [Symbol] The template argument kind.
+			def template_argument_kind(index)
+				Lib.cursor_get_template_argument_kind(@cursor, index)
+			end
+			
+			# Get the type of a template argument for a template specialization cursor.
+			# @parameter index [Integer] The zero-based template argument index.
+			# @returns [Types::Type] The template argument type, or an invalid type if the argument is not a type.
+			def template_argument_type(index)
+				Types::Type.create Lib.cursor_get_template_argument_type(@cursor, index), @translation_unit
+			end
+			
+			# Get the signed integral value of a template argument for a template specialization cursor.
+			# @parameter index [Integer] The zero-based template argument index.
+			# @returns [Integer] The signed integral value.
+			def template_argument_value(index)
+				Lib.cursor_get_template_argument_value(@cursor, index)
+			end
+			
+			# Get the unsigned integral value of a template argument for a template specialization cursor.
+			# @parameter index [Integer] The zero-based template argument index.
+			# @returns [Integer] The unsigned integral value.
+			def template_argument_unsigned_value(index)
+				Lib.cursor_get_template_argument_unsigned_value(@cursor, index)
+			end
+			
 			# Get the C++ access specifier.
 			# @returns [Symbol] The access specifier (`:public`, `:private`, or `:protected`).
 			def access_specifier
@@ -476,7 +510,7 @@ module FFI
 			# @returns [Array(Cursor)] Array of ancestor cursors matching the kinds.
 			def ancestors_by_kind(*kinds)
 				result = Array.new
-
+				
 				parent = self.semantic_parent
 				while parent.kind != :cursor_translation_unit
 					if kinds.include?(parent.kind)

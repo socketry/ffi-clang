@@ -152,6 +152,7 @@ describe Cursor do
 	let(:cursor_forward) {Index.new.parse_translation_unit(fixture_path("forward.h")).cursor}
 	let(:cursor_anonymous) {Index.new.parse_translation_unit(fixture_path("anonymous.h")).cursor}
 	let(:cursor_apis) {Index.new.parse_translation_unit(fixture_path("cursor_apis.cpp")).cursor}
+	let(:cursor_templates) {Index.new.parse_translation_unit(fixture_path("cursor_templates.cpp")).cursor}
 	
 	it "can be obtained from a translation unit" do
 		expect(cursor).to be_kind_of(Cursor)
@@ -566,6 +567,111 @@ describe Cursor do
 		it "returns the cursor kind of the specializations would be generated" do
 			expect(template.template_kind).to be_kind_of(Symbol)
 			expect(template.template_kind).to be(:cursor_function)
+		end
+	end
+	
+	describe "#num_template_arguments" do
+		let(:specialized_struct) do
+			find_matching(cursor_templates) do |child, parent|
+				child.kind == :cursor_struct and child.display_name == "MixedArgs<float, -7, true>"
+			end
+		end
+		
+		let(:non_template_struct) do
+			find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_struct and child.spelling == "A"
+			end
+		end
+		
+		it "returns the number of template arguments for a specialization cursor" do
+			expect(specialized_struct.num_template_arguments).to eq(3)
+		end
+		
+		it "returns -1 for a non-template cursor" do
+			expect(non_template_struct.num_template_arguments).to eq(-1)
+		end
+	end
+	
+	describe "#template_argument_kind" do
+		let(:specialized_struct) do
+			find_matching(cursor_templates) do |child, parent|
+				child.kind == :cursor_struct and child.display_name == "MixedArgs<float, -7, true>"
+			end
+		end
+		
+		it "returns the kind for each template argument" do
+			expect(specialized_struct.template_argument_kind(0)).to eq(:template_argument_type)
+			expect(specialized_struct.template_argument_kind(1)).to eq(:template_argument_integral)
+			expect(specialized_struct.template_argument_kind(2)).to eq(:template_argument_integral)
+		end
+	end
+	
+	describe "#template_argument_type" do
+		let(:specialized_struct) do
+			find_matching(cursor_templates) do |child, parent|
+				child.kind == :cursor_struct and child.display_name == "MixedArgs<float, -7, true>"
+			end
+		end
+		
+		let(:specialized_function) do
+			find_matching(cursor_templates) do |child, parent|
+				child.kind == :cursor_function and child.spelling == "specialized_func"
+			end
+		end
+		
+		it "returns the type template argument for a class specialization" do
+			arg_type = specialized_struct.template_argument_type(0)
+			expect(arg_type).to be_kind_of(Types::Type)
+			expect(arg_type.kind).to eq(:type_float)
+		end
+		
+		it "returns the type template argument for a function specialization" do
+			arg_type = specialized_function.template_argument_type(0)
+			expect(arg_type).to be_kind_of(Types::Type)
+			expect(arg_type.kind).to eq(:type_double)
+		end
+	end
+	
+	describe "#template_argument_value" do
+		let(:specialized_struct) do
+			find_matching(cursor_templates) do |child, parent|
+				child.kind == :cursor_struct and child.display_name == "MixedArgs<float, -7, true>"
+			end
+		end
+		
+		let(:specialized_function) do
+			find_matching(cursor_templates) do |child, parent|
+				child.kind == :cursor_function and child.spelling == "specialized_func"
+			end
+		end
+		
+		it "returns signed integral template argument values" do
+			expect(specialized_struct.template_argument_value(1)).to eq(-7)
+		end
+		
+		it "returns signed integral values for function specializations" do
+			expect(specialized_function.template_argument_value(1)).to eq(42)
+			expect(specialized_function.template_argument_value(2)).to eq(0)
+		end
+	end
+	
+	describe "#template_argument_unsigned_value" do
+		let(:unsigned_specialization) do
+			find_matching(cursor_templates) do |child, parent|
+				child.kind == :cursor_struct and child.display_name == "UnsignedArg<2147483649ULL>"
+			end
+		end
+		
+		it "returns unsigned integral template argument values" do
+			expect(unsigned_specialization.template_argument_unsigned_value(0)).to eq(2_147_483_649)
+		end
+		
+		it "returns unsigned values for boolean template arguments" do
+			specialized_struct = find_matching(cursor_templates) do |child, parent|
+				child.kind == :cursor_struct and child.display_name == "MixedArgs<float, -7, true>"
+			end
+			
+			expect(specialized_struct.template_argument_unsigned_value(2)).to eq(1)
 		end
 	end
 	
@@ -1485,7 +1591,7 @@ describe FFI::Clang::Cursor do
 			ancestors = method_cursor.ancestors_by_kind(:cursor_namespace)
 			expect(ancestors).to eq([])
 		end
-
+		
 		it "finds ancestors at multiple levels" do
 			nested = find_matching(cursor_cxx) do |child, parent|
 				child.spelling == "Nested" and parent.spelling == "Inner"

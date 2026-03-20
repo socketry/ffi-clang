@@ -474,6 +474,25 @@ module FFI
 			attach_function :get_specialized_cursor_template, :clang_getSpecializedCursorTemplate, [CXCursor.by_value], CXCursor.by_value
 			attach_function :get_template_cursor_kind, :clang_getTemplateCursorKind, [CXCursor.by_value], :cursor_kind
 			
+			enum :template_argument_kind, [
+				:template_argument_null, 0,
+				:template_argument_type, 1,
+				:template_argument_declaration, 2,
+				:template_argument_null_ptr, 3,
+				:template_argument_integral, 4,
+				:template_argument_template, 5,
+				:template_argument_template_expansion, 6,
+				:template_argument_expression, 7,
+				:template_argument_pack, 8,
+				:template_argument_invalid, 9
+			]
+			
+			attach_function :cursor_get_num_template_arguments, :clang_Cursor_getNumTemplateArguments, [CXCursor.by_value], :int
+			attach_function :cursor_get_template_argument_kind, :clang_Cursor_getTemplateArgumentKind, [CXCursor.by_value, :uint], :template_argument_kind
+			attach_function :cursor_get_template_argument_type, :clang_Cursor_getTemplateArgumentType, [CXCursor.by_value, :uint], CXType.by_value
+			attach_function :cursor_get_template_argument_value, :clang_Cursor_getTemplateArgumentValue, [CXCursor.by_value, :uint], :long_long
+			attach_function :cursor_get_template_argument_unsigned_value, :clang_Cursor_getTemplateArgumentUnsignedValue, [CXCursor.by_value, :uint], :ulong_long
+			
 			attach_function :get_translation_unit_cursor, :clang_getTranslationUnitCursor, [:CXTranslationUnit], CXCursor.by_value
 			attach_function :cursor_get_translation_unit, :clang_Cursor_getTranslationUnit, [CXCursor.by_value], :CXTranslationUnit
 			
