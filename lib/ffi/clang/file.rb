@@ -37,6 +37,16 @@ module FFI
 				Lib.extract_string Lib.get_file_name(self)
 			end
 			
+			# Get the loaded contents of this file from libclang.
+			# @returns [String | Nil] The file contents, or `nil` if the file is not loaded.
+			def contents
+				size_pointer = MemoryPointer.new(:size_t)
+				contents_pointer = Lib.get_file_contents(@translation_unit, self, size_pointer)
+				return nil if contents_pointer.null?
+				
+				contents_pointer.read_string_length(size_pointer.read(:size_t))
+			end
+			
 			# Get the file modification time.
 			# @returns [Time] The file modification time.
 			def time

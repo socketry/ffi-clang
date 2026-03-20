@@ -37,6 +37,7 @@ module FFI
 			
 			attach_function :get_file, :clang_getFile, [:CXTranslationUnit, :string], :CXFile
 			attach_function :get_file_name, :clang_getFileName, [:CXFile], CXString.by_value
+			attach_function :get_file_contents, :clang_getFileContents, [:CXTranslationUnit, :CXFile, :pointer], :pointer
 			attach_function :get_file_time, :clang_getFileTime, [:CXFile], :time_t
 			attach_function :is_file_multiple_include_guarded, :clang_isFileMultipleIncludeGuarded, [:CXTranslationUnit, :CXFile], :uint
 			

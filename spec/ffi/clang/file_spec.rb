@@ -7,6 +7,9 @@
 describe File do
 	let(:file_list) {Index.new.parse_translation_unit(fixture_path("list.c")).file(fixture_path("list.c"))}
 	let(:file_docs) {Index.new.parse_translation_unit(fixture_path("docs.c")).file(fixture_path("docs.h"))}
+	let(:unsaved_contents) {"int main(void) {\n\treturn 42;\n}\n"}
+	let(:unsaved_translation_unit) {Index.new.parse_translation_unit("a.c", nil, [UnsavedFile.new("a.c", unsaved_contents)])}
+	let(:unsaved_file) {unsaved_translation_unit.file("a.c")}
 	
 	it "can be obtained from a translation unit" do
 		expect(file_list).to be_kind_of(FFI::Clang::File)
@@ -27,6 +30,16 @@ describe File do
 		it "returns its file name" do
 			expect(name).to be_kind_of(String)
 			expect(name).to eq(fixture_path("list.c"))
+		end
+	end
+	
+	describe "#contents" do
+		it "returns the loaded file contents" do
+			expect(file_list.contents).to eq(::File.read(fixture_path("list.c")))
+		end
+		
+		it "returns unsaved file contents from the translation unit" do
+			expect(unsaved_file.contents).to eq(unsaved_contents)
 		end
 	end
 	
