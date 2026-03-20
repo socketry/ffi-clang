@@ -38,7 +38,8 @@ module FFI
 				:normal,
 				:bold,
 				:monospaced,
-				:emphasized
+				:emphasized,
+				:anchor
 			]
 			
 			enum :pass_direction, [

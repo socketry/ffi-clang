@@ -44,6 +44,20 @@ describe FFI::Clang::Lib::CXCursor do
 	end
 end
 
+describe "availability kind mapping" do
+	let(:availability_value_class) do
+		Class.new(FFI::Struct) do
+			layout :value, FFI::Clang::Lib.find_type(:availability)
+		end
+	end
+	let(:availability_value) {availability_value_class.new}
+	
+	it "maps the corrected accessibility symbol" do
+		availability_value[:value] = 3
+		expect(availability_value[:value]).to eq(:not_accessible)
+	end
+end
+
 describe "Function Call Cursors" do
 	let(:translation_unit) {Index.new.parse_translation_unit(fixture_path("class.cpp"))}
 	let(:cursor) {translation_unit.cursor}
@@ -832,13 +846,13 @@ describe Cursor do
 			expect(overriddens.size).to eq(2)
 			expect(overriddens.map{|cur| cur.semantic_parent.spelling}).to eq(["B", "C"])
 		end
-
+		
 		it "#each returns an Enumerator if no block is given" do
 			enumerator = override_cursor.overriddens.each
 			expect(enumerator).to be_kind_of(Enumerator)
 			expect(enumerator.to_a.size).to eq(2)
 		end
-
+		
 		it "returns empty collection for non-overriding methods" do
 			non_override = find_matching(cursor_cxx) do |child, parent|
 				child.kind == :cursor_cxx_method and child.spelling == "func_a" and parent.spelling == "A"
@@ -847,7 +861,7 @@ describe Cursor do
 			expect(overriddens.size).to eq(0)
 			expect(overriddens.to_a).to eq([])
 		end
-
+		
 		it "cursors remain valid after iteration" do
 			overriddens = override_cursor.overriddens
 			cursors = overriddens.to_a

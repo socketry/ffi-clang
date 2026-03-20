@@ -3,6 +3,12 @@
 # Released under the MIT License.
 # Copyright, 2024, by Charlie Savage.
 
+describe "printing policy property mappings" do
+	it "includes the constant array size property" do
+		expect(FFI::Clang::Lib::PrintingPolicyProperty[:printing_policy_constant_array_size_as_written]).to eq(7)
+	end
+end
+
 describe FFI::Clang::PrintingPolicy do
 	let(:translation_unit) {Index.new.parse_translation_unit(fixture_path("test.cxx"))}
 	let(:cursor) {translation_unit.cursor}

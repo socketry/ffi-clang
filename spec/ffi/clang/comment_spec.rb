@@ -7,6 +7,20 @@
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2024, by Charlie Savage.
 
+describe "comment render kind mapping" do
+	let(:render_kind_value_class) do
+		Class.new(FFI::Struct) do
+			layout :value, FFI::Clang::Lib.find_type(:render_kind)
+		end
+	end
+	let(:render_kind_value) {render_kind_value_class.new}
+	
+	it "maps the anchor render kind" do
+		render_kind_value[:value] = 4
+		expect(render_kind_value[:value]).to eq(:anchor)
+	end
+end
+
 describe Comment do
 	let(:cursor) {Index.new.parse_translation_unit(fixture_path("docs.cc")).cursor}
 	let (:comment) {find_by_kind(cursor, :cursor_function).comment}

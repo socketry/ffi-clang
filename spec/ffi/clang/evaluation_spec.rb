@@ -3,6 +3,20 @@
 # Released under the MIT License.
 # Copyright, 2026, by Charlie Savage.
 
+describe "eval result kind mapping" do
+	let(:eval_result_kind_value_class) do
+		Class.new(FFI::Struct) do
+			layout :value, FFI::Clang::Lib.find_type(:eval_result_kind)
+		end
+	end
+	let(:eval_result_kind_value) {eval_result_kind_value_class.new}
+	
+	it "maps CF string evaluation results" do
+		eval_result_kind_value[:value] = 5
+		expect(eval_result_kind_value[:value]).to eq(:c_f_str)
+	end
+end
+
 describe FFI::Clang::EvalResult do
 	let(:translation_unit) {Index.new.parse_translation_unit(fixture_path("eval.c"))}
 	let(:cursor) {translation_unit.cursor}

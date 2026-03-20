@@ -10,7 +10,7 @@ module FFI
 		# Represents the result of evaluating a cursor as a compile-time constant.
 		class EvalResult < AutoPointer
 			# Get the kind of this evaluation result.
-			# @returns [Symbol] The result kind (:int, :float, :str_literal, :obj_c_str_literal, :c_f_number, :other, :unexposed).
+			# @returns [Symbol] The result kind (:int, :float, :str_literal, :obj_c_str_literal, :c_f_str, :other, :unexposed).
 			def kind
 				Lib.eval_result_get_kind(self)
 			end

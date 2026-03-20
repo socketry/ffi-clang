@@ -350,7 +350,7 @@ module FFI
 				:available, 0,
 				:deprecated, 1,
 				:not_available, 2,
-				:not_accesible, 3
+				:not_accessible, 3
 			]
 			
 			enum :linkage_kind, [

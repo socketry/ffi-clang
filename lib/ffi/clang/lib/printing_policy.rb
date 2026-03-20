@@ -17,7 +17,7 @@ module FFI
 				:printing_policy_suppress_scope,
 				:printing_policy_suppress_unwritten_scope,
 				:printing_policy_suppress_initializers,
-				:printing_policy_constant_array_aize_as_written,
+				:printing_policy_constant_array_size_as_written,
 				:printing_policy_anonymous_tag_locations,
 				:printing_policy_suppress_strong_lifetime,
 				:printing_policy_suppress_lifetime_qualifiers,

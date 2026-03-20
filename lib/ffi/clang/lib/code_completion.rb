@@ -58,7 +58,9 @@ module FFI
 			CodeCompleteFlags = enum :code_complete_flags, [
 				:include_macros, 0x01,
 				:include_code_patterns, 0x02,
-				:include_brief_comments, 0x04
+				:include_brief_comments, 0x04,
+				:skip_preamble, 0x08,
+				:include_completions_with_fix_its, 0x10
 			]
 			
 			CompletionContext = enum :completion_context, [
@@ -85,7 +87,8 @@ module FFI
 				:objc_selector_name, 1 << 19,
 				:macro_name, 1 << 20,
 				:natural_language, 1 << 21,
-				:unknown, ((1 << 22) - 1),
+				:included_file, 1 << 22,
+				:unknown, ((1 << 23) - 1),
 			]
 			
 			# CXCompletionString functions
@@ -117,4 +120,3 @@ module FFI
 		end
 	end
 end
-

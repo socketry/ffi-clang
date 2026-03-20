@@ -13,7 +13,7 @@ module FFI
 				:float, 2,
 				:obj_c_str_literal, 3,
 				:str_literal, 4,
-				:c_f_number, 5,
+				:c_f_str, 5,
 				:other, 6,
 				:unexposed, 0
 			]
