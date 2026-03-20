@@ -17,6 +17,7 @@ require "set"
 require_relative "lib/cursor"
 require_relative "lib/code_completion"
 
+require_relative "overridden_cursors"
 require_relative "printing_policy"
 require_relative "source_location"
 require_relative "source_range"
@@ -605,20 +606,9 @@ module FFI
 			end
 			
 			# Get all cursors that this cursor overrides.
-			# @returns [Array(Cursor)] Array of overridden cursors.
+			# @returns [OverriddenCursors] Collection of overridden cursors.
 			def overriddens
-				cursor_ptr = FFI::MemoryPointer.new :pointer
-				num_ptr = FFI::MemoryPointer.new :uint
-				Lib.get_overridden_cursors(@cursor, cursor_ptr, num_ptr)
-				num = num_ptr.get_uint(0)
-				cur_ptr = cursor_ptr.get_pointer(0)
-				
-				overriddens = []
-				num.times {overriddens << Cursor.new(cur_ptr, @translation_unit)
-															cur_ptr += Lib::CXCursor.size
-				}
-				Lib.dispose_overridden_cursors(cursor_ptr.get_pointer(0)) if num != 0
-				overriddens
+				OverriddenCursors.new(@cursor, @translation_unit)
 			end
 			
 			# Check if this cursor represents a bitfield.

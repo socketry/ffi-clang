@@ -826,10 +826,33 @@ describe Cursor do
 			end
 		end
 		
-		it "returns the set of methods which are overridden by this cursor method" do
-			expect(override_cursor.overriddens).to be_kind_of(Array)
-			expect(override_cursor.overriddens.size).to eq(2)
-			expect(override_cursor.overriddens.map{|cur| cur.semantic_parent.spelling}).to eq(["B", "C"])
+		it "returns an OverriddenCursors collection" do
+			overriddens = override_cursor.overriddens
+			expect(overriddens).to be_kind_of(Cursor::OverriddenCursors)
+			expect(overriddens.size).to eq(2)
+			expect(overriddens.map{|cur| cur.semantic_parent.spelling}).to eq(["B", "C"])
+		end
+
+		it "#each returns an Enumerator if no block is given" do
+			enumerator = override_cursor.overriddens.each
+			expect(enumerator).to be_kind_of(Enumerator)
+			expect(enumerator.to_a.size).to eq(2)
+		end
+
+		it "returns empty collection for non-overriding methods" do
+			non_override = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_cxx_method and child.spelling == "func_a" and parent.spelling == "A"
+			end
+			overriddens = non_override.overriddens
+			expect(overriddens.size).to eq(0)
+			expect(overriddens.to_a).to eq([])
+		end
+
+		it "cursors remain valid after iteration" do
+			overriddens = override_cursor.overriddens
+			cursors = overriddens.to_a
+			expect(cursors[0].semantic_parent.spelling).to eq("B")
+			expect(cursors[1].semantic_parent.spelling).to eq("C")
 		end
 	end
 	
