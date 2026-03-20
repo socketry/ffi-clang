@@ -11,6 +11,8 @@ describe File do
 	let(:unsaved_contents) {"int main(void) {\n\treturn 42;\n}\n"}
 	let(:unsaved_translation_unit) {Index.new.parse_translation_unit("a.c", nil, [UnsavedFile.new("a.c", unsaved_contents)])}
 	let(:unsaved_file) {unsaved_translation_unit.file("a.c")}
+	let(:docs_header_path) {fixture_path("docs.h").tr("\\", "/")}
+	let(:extra_header_path) {fixture_path("extra.h").tr("\\", "/")}
 	
 	it "can be obtained from a translation unit" do
 		expect(file_list).to be_kind_of(FFI::Clang::File)
@@ -36,7 +38,7 @@ describe File do
 	
 	describe "#contents" do
 		it "returns the loaded file contents" do
-			expect(file_list.contents).to eq(::File.read(fixture_path("list.c")))
+			expect(file_list.contents).to eq(::File.binread(fixture_path("list.c")))
 		end
 		
 		it "returns unsaved file contents from the translation unit" do
@@ -83,22 +85,22 @@ describe File do
 	describe "#find_includes" do
 		it "returns an Enumerator if no block is given" do
 			enumerator = file_includes.find_includes
-			included_files = enumerator.map {|cursor, range| cursor.included_file.name}
+			included_files = enumerator.map {|cursor, range| cursor.included_file.name.tr("\\", "/")}
 			
 			expect(enumerator).to be_kind_of(Enumerator)
-			expect(included_files).to eq([fixture_path("docs.h"), fixture_path("extra.h")])
+			expect(included_files).to eq([docs_header_path, extra_header_path])
 		end
 		
 		it "visits include directives in order" do
 			visited = []
 			
 			file_includes.find_includes do |cursor, range|
-				visited << [cursor.kind, cursor.included_file.name, range.start.line, range.start.column]
+				visited << [cursor.kind, cursor.included_file.name.tr("\\", "/"), range.start.line, range.start.column]
 			end
 			
 			expect(visited).to eq([
-				[:cursor_inclusion_directive, fixture_path("docs.h"), 1, 1],
-				[:cursor_inclusion_directive, fixture_path("extra.h"), 2, 1],
+				[:cursor_inclusion_directive, docs_header_path, 1, 1],
+				[:cursor_inclusion_directive, extra_header_path, 2, 1],
 			])
 		end
 		
@@ -106,11 +108,11 @@ describe File do
 			visited = []
 			
 			file_includes.find_includes do |cursor, range|
-				visited << cursor.included_file.name
+				visited << cursor.included_file.name.tr("\\", "/")
 				:break
 			end
 			
-			expect(visited).to eq([fixture_path("docs.h")])
+			expect(visited).to eq([docs_header_path])
 		end
 	end
 end
