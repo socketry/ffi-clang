@@ -13,6 +13,7 @@
 require_relative "clang/lib"
 
 # Wrappers around C functionality:
+require_relative "clang/version"
 require_relative "clang/clang_version"
 require_relative "clang/index"
 require_relative "clang/translation_unit"
