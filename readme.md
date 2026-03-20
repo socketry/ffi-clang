@@ -1,6 +1,6 @@
 # FFI::Clang
 
-A light-weight wrapper for Ruby exposing [libclang](http://llvm.org/devmtg/2010-11/Gregor-libclang.pdf). Works for libclang v3.4+.
+A light-weight wrapper for Ruby exposing [libclang](http://llvm.org/devmtg/2010-11/Gregor-libclang.pdf). This project is currently tested with Clang/libclang 17 and newer.
 
 [![Development Status](https://github.com/ioquatix/ffi-clang/workflows/Test/badge.svg)](https://github.com/ioquatix/ffi-clang/actions?workflow=Test)
 
@@ -29,13 +29,13 @@ The following environment variables can be used to configure how ffi-clang finds
 | Variable | Description |
 |---|---|
 | `LLVM_CONFIG` | Path to the `llvm-config` binary. Used to locate the libclang shared library and clang binary. |
-| `LLVM_VERSION` | Target LLVM version (e.g., `3.4`). When set, disables auto-detection of `llvm-config`. |
+| `LLVM_VERSION` | Target LLVM version (e.g., `17`). When set, disables auto-detection of `llvm-config`. |
 | `LIBCLANG` | Direct path to the libclang shared library (e.g., `/usr/lib/libclang.so`). Overrides `llvm-config` based library discovery. |
 | `LIBCLANG_RESOURCE_DIR` | Path to the clang resource directory containing compiler-intrinsic headers (`stddef.h`, `stdarg.h`, etc.). Use this if libclang cannot find its own headers. |
 
 For example, to use a specific LLVM installation:
 
-    LLVM_CONFIG=llvm-config-mp-3.4 bundle exec bake test
+    LLVM_CONFIG=llvm-config-17 bundle exec bake test
 
 ## Releases
 
