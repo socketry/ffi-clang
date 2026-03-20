@@ -112,9 +112,7 @@ module FFI
 			# 	@returns [Integer] The presumed line number.
 			# @attribute [r] column
 			# 	@returns [Integer] The presumed column number.
-			# @attribute [r] offset
-			# 	@returns [Integer] The presumed byte offset.
-			attr_reader :filename, :line, :column, :offset
+			attr_reader :filename, :line, :column
 			
 			# Create a new presumed location and extract its components.
 			# @parameter location [FFI::Pointer] The low-level location handle.
