@@ -60,10 +60,20 @@ describe Diagnostic do
 	end
 	
 	context "#children" do
-		it "returns child diagnostics by Array" do
-			expect(diagnostic.children).to be_kind_of(Array)
+		it "returns a DiagnosticSet" do
+			expect(diagnostic.children).to be_kind_of(DiagnosticSet)
 			expect(diagnostic.children.first).to be_kind_of(Diagnostic)
 			expect(diagnostic.children.first.severity).to eq(:note)
+		end
+
+		it "returns the same cached set on repeated calls" do
+			expect(diagnostic.children).to equal(diagnostic.children)
+		end
+
+		it "#each returns an Enumerator if no block is given" do
+			enumerator = diagnostic.children.each
+			expect(enumerator).to be_kind_of(Enumerator)
+			expect(enumerator.first).to be_kind_of(Diagnostic)
 		end
 	end
 	

@@ -83,13 +83,9 @@ module FFI
 			end
 			
 			# Get child diagnostics.
-			# @returns [Array(Diagnostic)] Array of child diagnostics.
+			# @returns [DiagnosticSet] The child diagnostics.
 			def children
-				diagnostic_set = Lib.get_child_diagnostics(self)
-				num_diagnostics = Lib.get_num_diagnostics_in_set(diagnostic_set)
-				num_diagnostics.times.map {|i|
-					Diagnostic.new(@translation_unit, Lib.get_diagnostic_in_set(diagnostic_set, i))
-				}
+				@children ||= DiagnosticSet.new(Lib.get_child_diagnostics(self), @translation_unit)
 			end
 			
 			# Get the compiler option that enables this diagnostic.
