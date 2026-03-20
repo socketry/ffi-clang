@@ -11,9 +11,11 @@ module FFI
 	module Clang
 		class Cursor
 			# Represents the set of cursors overridden by a method.
-			# Wraps the array allocated by clang_getOverriddenCursors and
-			# disposes it via clang_disposeOverriddenCursors on release.
-			class OverriddenCursors < AutoPointer
+			# Calls clang_getOverriddenCursors, copies each CXCursor into
+			# Ruby-managed memory, then immediately disposes the buffer
+			# via clang_disposeOverriddenCursors. This avoids GC-order
+			# issues with AutoPointer where the buffer could be double-freed.
+			class OverriddenCursors
 				include Enumerable
 				
 				# @attribute [r] size
@@ -29,18 +31,25 @@ module FFI
 					Lib.get_overridden_cursors(cursor, cursor_ptr, num_ptr)
 					
 					@size = num_ptr.get_uint(0)
-					@translation_unit = translation_unit
 					
-					# When there are no overridden cursors, the pointer is
-					# uninitialized — do not pass it to AutoPointer.
-					pointer = @size > 0 ? cursor_ptr.get_pointer(0) : FFI::Pointer::NULL
-					super(pointer)
-				end
-				
-				# Release the overridden cursors buffer.
-				# @parameter pointer [FFI::Pointer] The pointer to release.
-				def self.release(pointer)
-					Lib.dispose_overridden_cursors(pointer) unless pointer.null?
+					if @size > 0
+						buffer = cursor_ptr.get_pointer(0)
+						
+						# Dup each CXCursor into Ruby-managed memory before
+						# disposing the buffer. Using an AutoPointer to defer
+						# disposal causes double-free crashes on Linux and MacOS
+						# (not windows) for unknown reasons.
+						cur_ptr = buffer
+						@cursors = @size.times.map do
+							cursor = Lib::CXCursor.new(cur_ptr).dup
+							cur_ptr += Lib::CXCursor.size
+							Cursor.new(cursor, translation_unit)
+						end
+						
+						Lib.dispose_overridden_cursors(buffer)
+					else
+						@cursors = []
+					end
 				end
 				
 				# Iterate over each overridden cursor.
@@ -50,11 +59,7 @@ module FFI
 				def each(&block)
 					return to_enum(__method__) unless block_given?
 					
-					cur_ptr = FFI::Pointer.new(self)
-					@size.times do
-						block.call(Cursor.new(Lib::CXCursor.new(cur_ptr), @translation_unit))
-						cur_ptr += Lib::CXCursor.size
-					end
+					@cursors.each(&block)
 					
 					self
 				end

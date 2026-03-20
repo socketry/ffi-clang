@@ -382,6 +382,14 @@ module FFI
 					:xdata, :int,
 					:data, [:pointer, 3]
 				)
+				
+				# Create a deep copy of this cursor in Ruby-managed memory.
+				# @returns [CXCursor] A new CXCursor with its own backing memory.
+				def dup
+					copy = self.class.new
+					copy.to_ptr.put_bytes(0, self.to_ptr.read_bytes(self.class.size))
+					copy
+				end
 			end
 			
 			# FFI struct representing a version number with major, minor, and subminor components.
