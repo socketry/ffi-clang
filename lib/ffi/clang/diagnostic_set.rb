@@ -23,11 +23,11 @@ module FFI
 		# would double-free.
 		class DiagnosticSet
 			include Enumerable
-
+			
 			# @attribute [r] size
 			# 	@returns [Integer] The number of diagnostics in the set.
 			attr_reader :size
-
+			
 			# Initialize a diagnostic set from a CXDiagnosticSet pointer.
 			# @parameter pointer [FFI::Pointer] The CXDiagnosticSet pointer (owned by parent Diagnostic).
 			# @parameter translation_unit [TranslationUnit] The parent translation unit.
@@ -37,16 +37,16 @@ module FFI
 					Diagnostic.new(translation_unit, Lib.get_diagnostic_in_set(pointer, i))
 				end
 			end
-
+			
 			# Iterate over each diagnostic.
 			# @yields {|diagnostic| ...} Each diagnostic.
 			# 	@parameter diagnostic [Diagnostic] The diagnostic.
 			# @returns [Enumerator] If no block is given.
 			def each(&block)
 				return to_enum(__method__) unless block_given?
-
+				
 				@diagnostics.each(&block)
-
+				
 				self
 			end
 		end
