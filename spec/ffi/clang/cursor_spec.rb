@@ -151,6 +151,7 @@ describe Cursor do
 	let(:cursor_pp) {Index.new.parse_translation_unit(fixture_path("docs.c"),[],[],[:detailed_preprocessing_record]).cursor}
 	let(:cursor_forward) {Index.new.parse_translation_unit(fixture_path("forward.h")).cursor}
 	let(:cursor_anonymous) {Index.new.parse_translation_unit(fixture_path("anonymous.h")).cursor}
+	let(:cursor_apis) {Index.new.parse_translation_unit(fixture_path("cursor_apis.cpp")).cursor}
 	
 	it "can be obtained from a translation unit" do
 		expect(cursor).to be_kind_of(Cursor)
@@ -459,6 +460,58 @@ describe Cursor do
 		
 		it "checks if the method call is dynamic" do
 			expect(dynamic_call.dynamic_call?).to be true
+		end
+	end
+	
+	describe "#has_global_storage?" do
+		let(:extern_var) do
+			find_matching(cursor_apis) do |child, parent|
+				child.kind == :cursor_variable and child.spelling == "extern_var"
+			end
+		end
+		
+		let(:static_var) do
+			find_matching(cursor_apis) do |child, parent|
+				child.kind == :cursor_variable and child.spelling == "static_var"
+			end
+		end
+		
+		let(:global_var) do
+			find_matching(cursor_apis) do |child, parent|
+				child.kind == :cursor_variable and child.spelling == "global_var"
+			end
+		end
+		
+		it "returns true for file-scope variable declarations" do
+			expect(extern_var.has_global_storage?).to be true
+			expect(static_var.has_global_storage?).to be true
+			expect(global_var.has_global_storage?).to be true
+		end
+	end
+	
+	describe "#has_external_storage?" do
+		let(:extern_var) do
+			find_matching(cursor_apis) do |child, parent|
+				child.kind == :cursor_variable and child.spelling == "extern_var"
+			end
+		end
+		
+		let(:static_var) do
+			find_matching(cursor_apis) do |child, parent|
+				child.kind == :cursor_variable and child.spelling == "static_var"
+			end
+		end
+		
+		let(:global_var) do
+			find_matching(cursor_apis) do |child, parent|
+				child.kind == :cursor_variable and child.spelling == "global_var"
+			end
+		end
+		
+		it "distinguishes external storage from other file-scope storage" do
+			expect(extern_var.has_external_storage?).to be true
+			expect(static_var.has_external_storage?).to be false
+			expect(global_var.has_external_storage?).to be false
 		end
 	end
 	

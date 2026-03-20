@@ -455,7 +455,7 @@ module FFI
 			attach_function :get_enum_unsigned_value, :clang_getEnumConstantDeclUnsignedValue, [CXCursor.by_value], :ulong_long
 			
 			attach_function :is_virtual_base, :clang_isVirtualBase, [CXCursor.by_value], :uint
-			attach_function :is_dynamic_call, :clang_Cursor_isDynamicCall, [CXCursor.by_value], :uint
+			attach_function :is_dynamic_call, :clang_Cursor_isDynamicCall, [CXCursor.by_value], :int
 			attach_function :is_variadic, :clang_Cursor_isVariadic, [CXCursor.by_value], :uint
 			
 			attach_function :is_definition, :clang_isCursorDefinition, [CXCursor.by_value], :uint
@@ -595,8 +595,8 @@ module FFI
 			attach_function :cursor_is_function_inlined, :clang_Cursor_isFunctionInlined, [CXCursor.by_value], :uint
 			attach_function :cursor_is_macro_function_like, :clang_Cursor_isMacroFunctionLike, [CXCursor.by_value], :uint
 			attach_function :cursor_is_macro_builtin, :clang_Cursor_isMacroBuiltin, [CXCursor.by_value], :uint
-			attach_function :cursor_has_var_decl_global_storage, :clang_Cursor_hasVarDeclGlobalStorage, [CXCursor.by_value], :uint
-			attach_function :cursor_has_var_decl_external_storage, :clang_Cursor_hasVarDeclExternalStorage, [CXCursor.by_value], :uint
+			attach_function :cursor_has_var_decl_global_storage, :clang_Cursor_hasVarDeclGlobalStorage, [CXCursor.by_value], :int
+			attach_function :cursor_has_var_decl_external_storage, :clang_Cursor_hasVarDeclExternalStorage, [CXCursor.by_value], :int
 			attach_function :cursor_is_inline_namespace, :clang_Cursor_isInlineNamespace, [CXCursor.by_value], :uint
 			attach_function :cursor_get_mangling, :clang_Cursor_getMangling, [CXCursor.by_value], CXString.by_value
 			attach_function :cursor_get_offset_of_field, :clang_Cursor_getOffsetOfField, [CXCursor.by_value], :long_long

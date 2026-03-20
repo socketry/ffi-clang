@@ -20,7 +20,7 @@ module FFI
 			end
 			
 			attach_function :get_null_location, :clang_getNullLocation, [], CXSourceLocation.by_value
-			attach_function :equal_locations, :clang_equalLocations,  [CXSourceLocation.by_value, CXSourceLocation.by_value], :int
+			attach_function :equal_locations, :clang_equalLocations,  [CXSourceLocation.by_value, CXSourceLocation.by_value], :uint
 			
 			attach_function :get_location, :clang_getLocation, [:CXTranslationUnit, :CXFile, :uint, :uint], CXSourceLocation.by_value
 			attach_function :get_location_offset, :clang_getLocationForOffset, [:CXTranslationUnit, :CXFile, :uint], CXSourceLocation.by_value
