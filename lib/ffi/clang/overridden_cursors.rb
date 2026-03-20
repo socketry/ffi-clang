@@ -31,7 +31,10 @@ module FFI
 					@size = num_ptr.get_uint(0)
 					@translation_unit = translation_unit
 					
-					super(cursor_ptr.get_pointer(0))
+					# When there are no overridden cursors, the pointer is
+					# uninitialized — do not pass it to AutoPointer.
+					pointer = @size > 0 ? cursor_ptr.get_pointer(0) : FFI::Pointer::NULL
+					super(pointer)
 				end
 				
 				# Release the overridden cursors buffer.
