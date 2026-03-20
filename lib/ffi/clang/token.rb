@@ -71,12 +71,42 @@ module FFI
 		
 		# Represents a single token in the source code.
 		class Token
+			# Owns a single libclang token buffer and disposes it when no longer referenced.
+			class Owner < AutoPointer
+				# Wrap the token pointer with the metadata needed by `clang_disposeTokens`.
+				# @parameter pointer [FFI::Pointer] The libclang token buffer.
+				# @parameter translation_unit [TranslationUnit] The translation unit that owns the token.
+				def initialize(pointer, translation_unit)
+					super Lib::TokensPointer.new(pointer, 1, translation_unit)
+				end
+				
+				# Release the token buffer.
+				# @parameter pointer [Lib::TokensPointer] The token pointer to release.
+				def self.release(pointer)
+					Lib.dispose_tokens(pointer.translation_unit, pointer, pointer.token_size)
+				end
+			end
+			
+			# Look up the token that starts at the given source location.
+			# @parameter translation_unit [TranslationUnit] The translation unit to query.
+			# @parameter location [SourceLocation] The source location where the token should start.
+			# @returns [Token | Nil] The token at the location, or `nil` if no token starts there.
+			def self.from_location(translation_unit, location)
+				token_pointer = Lib.get_token(translation_unit, location.location)
+				return nil if token_pointer.null?
+				
+				owner = Owner.new(token_pointer, translation_unit)
+				Token.new(owner, translation_unit, owner)
+			end
+			
 			# Initialize a token.
 			# @parameter token [FFI::Pointer] The token pointer.
 			# @parameter translation_unit [TranslationUnit] The parent translation unit.
-			def initialize(token, translation_unit)
+			# @parameter owner [Object | Nil] An object that keeps the token storage alive.
+			def initialize(token, translation_unit, owner = nil)
 				@token = token
 				@translation_unit = translation_unit
+				@owner = owner
 			end
 			
 			# Get the kind of this token.

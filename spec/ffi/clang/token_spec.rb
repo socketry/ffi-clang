@@ -45,6 +45,7 @@ end
 
 describe Token do
 	let(:translation_unit) {Index.new.parse_translation_unit(fixture_path("list.c"))}
+	let(:file) {translation_unit.file(fixture_path("list.c"))}
 	let(:cursor) {translation_unit.cursor}
 	let(:range) {find_by_kind(cursor, :cursor_struct).extent}
 	let(:token) {translation_unit.tokenize(range).first}
@@ -71,5 +72,21 @@ describe Token do
 	it "#extent" do
 		expect(token.extent).to be_kind_of(SourceRange)
 		expect(token.extent.start.line).to eq(1)
+	end
+	
+	describe ".from_location" do
+		it "returns the token that starts at a source location" do
+			token = Token.from_location(translation_unit, translation_unit.location(file, 1, 1))
+			
+			expect(token).to be_kind_of(Token)
+			expect(token.kind).to eq(:keyword)
+			expect(token.spelling).to eq("struct")
+		end
+		
+		it "returns nil when no token starts at the source location" do
+			token = Token.from_location(translation_unit, SourceLocation.null_location)
+			
+			expect(token).to be_nil
+		end
 	end
 end
