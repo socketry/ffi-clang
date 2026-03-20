@@ -20,7 +20,7 @@ module FFI
 				)
 			end
 			
-			attach_function :get_null_range, :clang_getNullRange, [], CXSourceLocation.by_value
+			attach_function :get_null_range, :clang_getNullRange, [], CXSourceRange.by_value
 			attach_function :get_range, :clang_getRange, [CXSourceLocation.by_value, CXSourceLocation.by_value], CXSourceRange.by_value
 			attach_function :get_range_start, :clang_getRangeStart, [CXSourceRange.by_value], CXSourceLocation.by_value
 			attach_function :get_range_end, :clang_getRangeEnd, [CXSourceRange.by_value], CXSourceLocation.by_value

@@ -22,6 +22,11 @@ describe SourceRange do
 	
 	describe "Null Range" do
 		let(:null_range) {SourceRange.null_range}
+		
+		it "wraps a CXSourceRange structure" do
+			expect(null_range.range).to be_kind_of(Lib::CXSourceRange)
+		end
+		
 		it "can be a null range" do
 			expect(null_range).to be_kind_of(SourceRange)
 		end
