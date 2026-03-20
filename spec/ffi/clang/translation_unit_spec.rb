@@ -127,9 +127,19 @@ describe TranslationUnit do
 	describe "#save" do
 		let (:filepath) {"#{TMP_DIR}/save_translation_unit"}
 		let (:may_not_exist_filepath) {"#{TMP_DIR}/not_writable_directory/save_translation_unit"}
+		
 		it "saves translation unit as a file" do
 			expect{translation_unit.save(filepath)}.not_to raise_error
 			expect(FileTest.exist?(filepath)).to be true
+		end
+		
+		it "saves translation unit using an explicit valid save option" do
+			expect{translation_unit.save(filepath, [:save_translation_unit_none])}.not_to raise_error
+			expect(FileTest.exist?(filepath)).to be true
+		end
+		
+		it "raises exception if a save option is invalid" do
+			expect{translation_unit.save(filepath, [:not_a_real_flag])}.to raise_error(FFI::Clang::Error)
 		end
 		
 		it "raises exception if save path is not writable" do

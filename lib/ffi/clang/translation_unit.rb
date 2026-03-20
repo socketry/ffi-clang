@@ -51,10 +51,17 @@ module FFI
 			
 			# Save the translation unit to a file.
 			# @parameter filename [String] The path where the translation unit should be saved.
-			# @parameter opts [Hash] Save options.
+			# @parameter opts [Array(Symbol) | Nil] Save options, or `nil` for libclang defaults.
 			# @raises [Error] If saving fails.
-			def save(filename, opts = {})
-				ret = Lib.save_translation_unit(self, filename, 0)
+			def save(filename, opts = nil)
+				option_bitmask =
+					if opts.nil?
+						Lib.default_save_options(self)
+					else
+						Lib.bitmask_from(Lib::SaveTranslationUnitFlags, opts)
+					end
+				
+				ret = Lib.save_translation_unit(self, filename, option_bitmask)
 				sym = Lib::SaveError[ret]
 				raise Error, "unknown return values: #{ret} #{sym.inspect}" unless sym
 				raise Error, "save error: #{sym.inspect}, filename: #{filename}" if sym != :none
