@@ -26,6 +26,7 @@
   - Update `CXCallingConv` to match current clang headers, correcting `X86RegCall` and adding `RISCVVLSCall_*` calling conventions.
   - Update `CXCodeComplete_Flags`, `CXCompletionContext`, `CXCommentInlineCommandRenderKind`, `CXEvalResultKind`, `CXAvailabilityKind`, and `CXPrintingPolicyProperty` to match current clang headers, including newer completion flags and contexts and corrected enum symbol names.
   - Fix the signedness of libclang predicate bindings for dynamic-call, variable-storage, include-guard, and source-location equality checks to match current headers.
+  - Fix `CXIdxEntityRefInfo[:role]` to use an integer bitmask so single-role indexing references do not get mis-decoded as enum symbols and crash role extraction.
   - Fix {ruby FFI::Clang::Cursor\#overriddens} use-after-free: extract `OverriddenCursors` class that owns the buffer via AutoPointer and disposes it on GC instead of immediately after iteration.
   - Fix {ruby FFI::Clang::Diagnostic\#children} double-free on repeated calls: extract `DiagnosticSet` class that caches child diagnostics so each is disposed exactly once.
   - Fix {ruby FFI::Clang::Cursor\#ancestors\_by\_kind} to walk the full semantic parent chain instead of only checking the immediate parent.
@@ -33,17 +34,19 @@
 
 ### New APIs
 
-  - **Cursor**: `binary_operator_kind` (clang 17+), `brief_comment_text`, `evaluate`, `function_inlined?`, `has_attrs?`, `has_external_storage?`, `has_global_storage?`, `inline_namespace?`, `invalid_declaration?`, `macro_builtin?`, `macro_function_like?`, `mangling`, `num_template_arguments`, `offset_of_field`, `spelling_name_range`, `storage_class`, `template_argument_kind`, `template_argument_type`, `template_argument_unsigned_value`, `template_argument_value`, `tls_kind`, `unary_operator_kind` (clang 17+), `visibility`.
+  - **Cursor**: `binary_operator_kind` (clang 17+), `brief_comment_text`, `cxx_manglings`, `evaluate`, `function_inlined?`, `has_attrs?`, `has_external_storage?`, `has_global_storage?`, `inline_namespace?`, `invalid_declaration?`, `macro_builtin?`, `macro_function_like?`, `mangling`, `num_template_arguments`, `offset_of_field`, `spelling_name_range`, `storage_class`, `template_argument_kind`, `template_argument_type`, `template_argument_unsigned_value`, `template_argument_value`, `tls_kind`, `unary_operator_kind` (clang 17+), `visibility`.
   - **Cursor class methods**: `binary_operator_kind_spelling` (clang 17+), `unary_operator_kind_spelling` (clang 17+).
   - **CursorSet**: New class with `include?` and `insert` for fast cursor membership checks.
   - **Diagnostic**: `category`, `category_id`, `children`, `disable_option`, `enable_option`.
   - **Diagnostic class methods**: `default_display_opts`.
   - **DiagnosticSet**: New enumerable class returned by `Diagnostic#children`.
   - **EvalResult**: New class for compile-time constant evaluation — `as_double`, `as_int`, `as_long_long`, `as_str`, `as_unsigned`, `kind`, `unsigned_int?`.
-  - **File**: `==`, `contents`, `find_includes`, `real_path_name`.
-  - **Index**: `create_translation_unit2`, `create_translation_unit_from_source_file`, keyword-configurable `new` (clang 17+) backed by `CXChoice` and `CXIndexOptions`, `parse_translation_unit_with_invocation`.
+  - **File**: `==`, `contents`, `find_includes`, `real_path_name`, `skipped_ranges`.
+  - **Index**: `create_translation_unit2`, `create_translation_unit_from_source_file`, `create_action`, `global_options`, `global_options=`, `index_source_file`, `index_source_file_with_invocation`, `index_translation_unit`, `invocation_emission_path=`, keyword-configurable `new` (clang 17+) backed by `CXChoice` and `CXIndexOptions`, `parse_translation_unit_with_invocation`.
+  - **IndexAction**: New wrapper for libclang's higher-level indexing callbacks with `index_source_file`, `index_source_file_with_invocation`, and `index_translation_unit`.
+  - **StringSet**: New enumerable wrapper for libclang `CXStringSet` results.
   - **Token**: `from_location`.
-  - **TranslationUnit**: `suspend`, `target_pointer_width`, `target_triple`.
+  - **TranslationUnit**: `all_skipped_ranges`, `skipped_ranges`, `suspend`, `target_pointer_width`, `target_triple`.
   - **Type**: `address_space`, `fully_qualified_name` (clang 21+), `modified_type`, `nullability`, `pretty_printed` (clang 21+), `transparent_tag_typedef?`, `typedef_name`, `unqualified_type` (clang 16+), `value_type`, `visit_fields`.
 
 ## v0.14.0 (2025-10-24)
