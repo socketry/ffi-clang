@@ -1,6 +1,6 @@
 # FFI::Clang
 
-A light-weight wrapper for Ruby exposing [libclang](http://llvm.org/devmtg/2010-11/Gregor-libclang.pdf). This project is currently tested with Clang/libclang 17 and newer.
+A light-weight wrapper for Ruby exposing [libclang](http://llvm.org/devmtg/2010-11/Gregor-libclang.pdf). This project is currently tested with Clang/libclang 18 and higher.
 
 [![Development Status](https://github.com/ioquatix/ffi-clang/workflows/Test/badge.svg)](https://github.com/ioquatix/ffi-clang/actions?workflow=Test)
 
