@@ -76,7 +76,7 @@ module FFI
 				file_path = self.start.file
 				return nil if file_path.nil?
 				
-				::File.open(file_path, "r") do |file|
+				::File.open(file_path, "rb") do |file|
 					file.seek(self.start.offset)
 					return file.read(self.bytesize)
 				end
