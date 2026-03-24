@@ -13,12 +13,12 @@ Gem::Specification.new do |spec|
 	spec.cert_chain  = ["release.cert"]
 	spec.signing_key = File.expand_path("~/.gem/release.pem")
 	
-	spec.homepage = "https://github.com/ioquatix/ffi-clang"
+	spec.homepage = "https://github.com/socketry/ffi-clang"
 	
 	spec.metadata = {
-		"documentation_uri" => "https://ioquatix.github.io/ffi-clang/",
-		"funding_uri" => "https://github.com/sponsors/ioquatix/",
-		"source_code_uri" => "https://github.com/ioquatix/ffi-clang.git",
+		"documentation_uri" => "https://socketry.github.io/ffi-clang/",
+		"funding_uri" => "https://github.com/sponsors/socketry/",
+		"source_code_uri" => "https://github.com/socketry/ffi-clang.git",
 	}
 	
 	spec.files = Dir.glob(["{ext,lib}/**/*", "*.md"], File::FNM_DOTMATCH, base: __dir__)

@@ -52,23 +52,23 @@
   - **TranslationUnit**: `all_skipped_ranges`, `skipped_ranges`, `suspend`, `target_pointer_width`, `target_triple`.
   - **Type**: `address_space`, `fully_qualified_name` (clang 21+), `modified_type`, `nullability`, `pretty_printed` (clang 21+), `transparent_tag_typedef?`, `typedef_name`, `unqualified_type` (clang 16+), `value_type`, `visit_base_classes` (clang 21+), `visit_fields`, `visit_methods` (clang 21+).
 
-## v0.14.0 (2025-10-24)
+## v0.14.0
 
   - Helper method that returns a cursor's {ruby FFI::Clang::Cursor\#qualified\_display\_name}.
   - Add release notes and documentation tooling.
   - Modernize code and achieve 100% documentation coverage.
   - Update minimum Ruby version to 3.2.
 
-## v0.13.0 (2025-02-16)
+## v0.13.0
 
   - Add support for `clang_Type_getNamedType`. (#90)
   - Try clang v18 + add Ruby v3.4 to test matrix. (#91)
 
-## v0.12.0 (2024-11-27)
+## v0.12.0
 
   - Prefer `LIBCLANG` and `LLVM_CONFIG` overrides over Xcode. (#88)
 
-## v0.11.0 (2024-11-13)
+## v0.11.0
 
   - Restore `visit_children` method. Fixes #82. (#84)
   - Expose Clang's exception specification API. (#87)
@@ -76,13 +76,13 @@
   - Fix qualified name. (#83)
   - Update clang version. (#86)
 
-## v0.10.0 (2024-06-14)
+## v0.10.0
 
   - Expose libclang's anonymous methods. (#79)
   - Use Enumerable. (#80)
   - Split `FFI::Clang::Type` into a number of more cohesive subclasses inheriting from `FFI::Clang::Types::Type`. (#81)
 
-## v0.9.0 (2024-04-07)
+## v0.9.0
 
   - Remove duplicate mapping of `clang_getEnumDeclIntegerType`. (#67)
   - Update bitmask options based on enums to always be an array of symbols. (#69)
@@ -92,7 +92,7 @@
   - Fix Clang 16 compatibility. (#76)
   - Cursor location methods. (#78)
 
-## v0.8.0 (2023-05-01)
+## v0.8.0
 
   - Modernize gem. (#58)
   - Test on clang 5.0+. (#59)
@@ -101,7 +101,7 @@
   - Set `cursor_translation_unit` enum value based on the Clang version. (#64)
   - Add various C++ introspection methods. (#66)
 
-## v0.7.0 (2022-11-15)
+## v0.7.0
 
   - Fix incorrect return type of `clang_getTranslationUnitSpelling`.
   - Fix `compilation_database_spec`.
@@ -113,31 +113,31 @@
   - Implement libclang `findReferencesInFile` functionality.
   - Allow `TranslationUnit#file` to return the main file.
 
-## v0.6.0 (2019-03-24)
+## v0.6.0
 
   - Add missing translation unit parse flags.
 
-## v0.5.0 (2017-03-15)
+## v0.5.0
 
   - Modernize code base, Clang v3.4+ only.
   - Get text from `SourceRange`.
   - Integrate `find_*` into `Cursor`.
   - Test case for method calls inside classes. (#36)
 
-## v0.3.0 (2016-02-05)
+## v0.3.0
 
   - Find and use `llvm-config`. (#38)
   - Recognize Xcode 7.
   - Add functions needed by RoboVM's bro-gen script.
 
-## v0.2.1 (2014-06-23)
+## v0.2.1
 
   - Add inclusions support. (#32)
   - Update unit tests for RSpec 3.
   - Add `CompilationDatabase`. (#27)
   - Only use `.dylib` on Darwin. (#29)
 
-## v0.2.0 (2014-02-03)
+## v0.2.0
 
   - Add clang version string APIs.
   - Add cursor functions (except Objective-C). (#9)
@@ -145,24 +145,24 @@
   - Add `TranslationUnit` reference to `Cursor` and `Type`. (#11)
   - Multi-version libclang testing via Travis. (#10)
 
-## v0.1.3 (2013-08-08)
+## v0.1.3
 
   - Add `CXType` support. (#5)
   - Correct camelCase `displayName` to `display_name`.
 
-## v0.1.2 (2013-07-30)
+## v0.1.2
 
   - Initial support for source comments. (#4)
   - Use different classes for comment types.
 
-## v0.1.1 (2013-07-28)
+## v0.1.1
 
   - Support unsaved files. (#3)
   - Add `Cursor` visitor function taking a block.
   - Add null cursor and `clang_is*` functions.
   - Add `SourceLocation` from diagnostic.
 
-## v0.1.0 (2013-06-13)
+## v0.1.0
 
   - Initial release.
   - FFI bindings for libclang Index, TranslationUnit, Diagnostic, SourceLocation.

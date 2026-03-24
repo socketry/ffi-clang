@@ -20,14 +20,14 @@ Or install it yourself as:
 
 ## Usage
 
-Please see the [project documentation](https://ioquatix.github.io/ffi-clang/) for more details.
+Please see the [project documentation](https://socketry.github.io/ffi-clang/) for more details.
 
 ### Configuration
 
 The following environment variables can be used to configure how ffi-clang finds libclang and its resources:
 
 | Variable | Description |
-|---|---|
+| --- | --- |
 | `LLVM_CONFIG` | Path to the `llvm-config` binary. Used to locate the libclang shared library and clang binary. |
 | `LLVM_VERSION` | Target LLVM version (e.g., `17`). When set, disables auto-detection of `llvm-config`. |
 | `LIBCLANG` | Direct path to the libclang shared library (e.g., `/usr/lib/libclang.so`). Overrides `llvm-config` based library discovery. |
@@ -39,7 +39,79 @@ For example, to use a specific LLVM installation:
 
 ## Releases
 
-Please see the [project releases](https://ioquatix.github.io/ffi-clang/releases/index) for all releases.
+Please see the [project releases](https://socketry.github.io/ffi-clang/releases/index) for all releases.
+
+### v0.15.0
+
+  - [Platform Support](https://socketry.github.io/ffi-clang/releases/index#platform-support)
+  - [Breaking Changes](https://socketry.github.io/ffi-clang/releases/index#breaking-changes)
+  - [Bug Fixes](https://socketry.github.io/ffi-clang/releases/index#bug-fixes)
+  - [New APIs](https://socketry.github.io/ffi-clang/releases/index#new-apis)
+
+### v0.14.0
+
+  - Helper method that returns a cursor's <code class="language-ruby">FFI::Clang::Cursor\#qualified\_display\_name</code>.
+  - Add release notes and documentation tooling.
+  - Modernize code and achieve 100% documentation coverage.
+  - Update minimum Ruby version to 3.2.
+
+### v0.13.0
+
+  - Add support for `clang_Type_getNamedType`. (\#90)
+  - Try clang v18 + add Ruby v3.4 to test matrix. (\#91)
+
+### v0.12.0
+
+  - Prefer `LIBCLANG` and `LLVM_CONFIG` overrides over Xcode. (\#88)
+
+### v0.11.0
+
+  - Restore `visit_children` method. Fixes \#82. (\#84)
+  - Expose Clang's exception specification API. (\#87)
+  - Support iterating over `Type::Function` args and expose `Lib.get_non_reference_type`. (\#85)
+  - Fix qualified name. (\#83)
+  - Update clang version. (\#86)
+
+### v0.10.0
+
+  - Expose libclang's anonymous methods. (\#79)
+  - Use Enumerable. (\#80)
+  - Split `FFI::Clang::Type` into a number of more cohesive subclasses inheriting from `FFI::Clang::Types::Type`. (\#81)
+
+### v0.9.0
+
+  - Remove duplicate mapping of `clang_getEnumDeclIntegerType`. (\#67)
+  - Update bitmask options based on enums to always be an array of symbols. (\#69)
+  - Add support for `parse_translation_unit2` API. (\#70)
+  - Cursor improvements, Type improvements, Printing support. (\#72)
+  - Fix finalizer exception in `FFI::Clang::CodeCompletion::Results`. (\#74)
+  - Fix Clang 16 compatibility. (\#76)
+  - Cursor location methods. (\#78)
+
+### v0.8.0
+
+  - Modernize gem. (\#58)
+  - Test on clang 5.0+. (\#59)
+  - Fix `CXCursor_TranslationUnit` enum value to 350. (\#61)
+  - Add `Cursor#hash` and `Cursor#eql?`. (\#62)
+  - Set `cursor_translation_unit` enum value based on the Clang version. (\#64)
+  - Add various C++ introspection methods. (\#66)
+
+### v0.7.0
+
+  - Fix incorrect return type of `clang_getTranslationUnitSpelling`.
+  - Fix `compilation_database_spec`.
+  - Fix libclang lookup for Xcode.
+  - Fix warning on class re-definition.
+  - Update cursor kinds.
+  - Find `libclang.dll` under Windows.
+  - Allow retrieval of list of references from a Cursor.
+  - Implement libclang `findReferencesInFile` functionality.
+  - Allow `TranslationUnit#file` to return the main file.
+
+### v0.6.0
+
+  - Add missing translation unit parse flags.
 
 ## Contributing
 
