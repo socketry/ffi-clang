@@ -3,6 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2014-2025, by Samuel Williams.
+# Copyright, 2026, by Charlie Savage.
 
 require_relative "lib/token"
 require_relative "lib/cursor"
@@ -25,17 +26,17 @@ module FFI
 			# @parameter token_size [Integer] The number of tokens.
 			# @parameter translation_unit [TranslationUnit] The parent translation unit.
 			def initialize(pointer, token_size, translation_unit)
-				ptr = Lib::TokensPointer.new(pointer,token_size, translation_unit)
-				super ptr
+				super(Lib::TokensPointer.new(pointer, token_size, translation_unit))
 				
 				@translation_unit = translation_unit
 				@size = token_size
 				
 				@tokens = []
-				cur_ptr = pointer
-				token_size.times {@tokens << Token.new(cur_ptr, translation_unit)
-																						cur_ptr += Lib::CXToken.size
-				}
+				current = pointer
+				token_size.times do
+					@tokens << Token.new(current, translation_unit)
+					current += Lib::CXToken.size
+				end
 			end
 			
 			# Release the tokens pointer.
@@ -61,11 +62,13 @@ module FFI
 				Lib.annotate_tokens(@translation_unit, self, @size, ptr)
 				
 				cur_ptr = ptr
-				arr = []
-				@size.times {arr << Cursor.new(cur_ptr, @translation_unit)
-																	cur_ptr += Lib::CXCursor.size
-				}
-				arr
+				array = []
+				@size.times do
+					array << Cursor.new(cur_ptr, @translation_unit)
+					cur_ptr += Lib::CXCursor.size
+				end
+				
+				return array
 			end
 		end
 		

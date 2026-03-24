@@ -6,6 +6,7 @@
 # Copyright, 2013-2025, by Samuel Williams.
 # Copyright, 2013, by Carlos Martín Nieto.
 # Copyright, 2014, by Masahiro Sano.
+# Copyright, 2026, by Charlie Savage.
 
 require_relative "string"
 require_relative "translation_unit"

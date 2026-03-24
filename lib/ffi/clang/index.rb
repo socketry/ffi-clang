@@ -8,7 +8,7 @@
 # Copyright, 2013, by Dave Wilkinson.
 # Copyright, 2013, by Takeshi Watanabe.
 # Copyright, 2014, by Masahiro Sano.
-# Copyright, 2023, by Charlie Savage.
+# Copyright, 2023-2026, by Charlie Savage.
 
 require_relative "lib/index"
 require_relative "error"

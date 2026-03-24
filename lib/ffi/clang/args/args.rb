@@ -146,10 +146,10 @@ module FFI
 				candidates.concat Dir.glob(::File.join(base, "..", "..", "lib", "clang", "*"))
 				candidates.concat Dir.glob(::File.join(base, "clang", "*"))
 				
-				candidates = candidates.map {|p| ::File.expand_path(p)}.uniq
+				candidates = candidates.map{|p| ::File.expand_path(p)}.uniq
 				
 				candidates
-					.select {|dir| valid_resource_dir?(dir)}
+					.select{|dir| valid_resource_dir?(dir)}
 					.sort
 					.last
 			end

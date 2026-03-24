@@ -3,7 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2014-2025, by Samuel Williams.
-# Copyright, 2023, by Charlie Savage.
+# Copyright, 2023-2026, by Charlie Savage.
 
 describe "code completion enum mappings" do
 	it "includes current code completion flags" do
@@ -28,9 +28,9 @@ describe CodeCompletion do
 		let(:options) {FFI::Clang::CodeCompletion.default_code_completion_options}
 		it "returns a default set of code-completion options" do
 			expect(options).to be_kind_of(Array)
-			options.each {|symbol|
+			options.each do |symbol|
 				expect(FFI::Clang::Lib::CodeCompleteFlags.symbols).to include(symbol)
-			}
+			end
 		end
 	end
 	
@@ -53,7 +53,7 @@ describe CodeCompletion do
 		it "#each" do
 			spy = double(stub: nil)
 			expect(spy).to receive(:stub).exactly(results.size).times
-			results.each {spy.stub}
+			results.each{spy.stub}
 		end
 		
 		it "#each returns an Enumerator if no block is given" do
@@ -78,7 +78,7 @@ describe CodeCompletion do
 		
 		it "#contexts" do
 			expect(results.contexts).to be_kind_of(Array)
-			results.contexts.each {|symbol|
+			results.contexts.each{|symbol|
 				expect(FFI::Clang::Lib::CompletionContext.symbols).to include(symbol)
 			}
 		end
@@ -147,7 +147,7 @@ describe CodeCompletion do
 		let(:fixit_results) {fixit_tu.code_complete(fixit_filename, 9, 14, [], [:include_completions_with_fix_its])}
 		
 		it "returns fix-its for completions that require them" do
-			results_with_fixits = fixit_results.select {|r| r.num_fix_its > 0}
+			results_with_fixits = fixit_results.select{|r| r.num_fix_its > 0}
 			expect(results_with_fixits).not_to be_empty
 			
 			result = results_with_fixits.first
@@ -213,7 +213,7 @@ describe CodeCompletion do
 	describe "CodeCompletion::String with annotations" do
 		let(:annotated_results) {translation_unit.code_complete(filename, 17, 7)}
 		let(:annotated_str) do
-			annotated_results.find {|r| r.string.num_annotations > 0}.string
+			annotated_results.find{|r| r.string.num_annotations > 0}.string
 		end
 		
 		it "#num_annotations returns the annotation count" do

@@ -18,7 +18,7 @@ Copyright, 2019, by Michael Metivier.
 Copyright, 2019, by Dominic Sisnero.  
 Copyright, 2020, by Zete Lui.  
 Copyright, 2022, by Motonori Iwamuro.  
-Copyright, 2023-2025, by Charlie Savage.  
+Copyright, 2023-2026, by Charlie Savage.  
 Copyright, 2024, by msepga.  
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

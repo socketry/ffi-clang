@@ -6,7 +6,7 @@
 # Copyright, 2013-2025, by Samuel Williams.
 # Copyright, 2013, by Garry Marshall.
 # Copyright, 2014, by Masahiro Sano.
-# Copyright, 2023, by Charlie Savage.
+# Copyright, 2023-2026, by Charlie Savage.
 
 require_relative "lib/diagnostic"
 require_relative "source_range"
@@ -67,11 +67,11 @@ module FFI
 			# @returns [Array(Hash)] Array of fix-its with `:text` and `:range` keys.
 			def fixits
 				n = Lib.get_diagnostic_num_fix_its(self)
-				n.times.map {|i|
+				n.times.map do |i|
 					ptr = MemoryPointer.new Lib::CXSourceRange
 					replace_text = Lib.extract_string(Lib.get_diagnostic_fix_it(self, i, ptr))
 					{text: replace_text, range: SourceRange.new(ptr)}
-				}
+				end
 			end
 			
 			# Get the source ranges associated with the diagnostic.
@@ -79,7 +79,7 @@ module FFI
 			def ranges
 				n = Lib.get_diagnostic_num_ranges(self)
 				
-				n.times.map {|i| SourceRange.new Lib.get_diagnostic_range(self, i)}
+				n.times.map{|i| SourceRange.new Lib.get_diagnostic_range(self, i)}
 			end
 			
 			# Get child diagnostics.

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2024, by Charlie Savage.
+# Copyright, 2026, by Charlie Savage.
 
 describe "printing policy property mappings" do
 	it "includes the constant array size property" do

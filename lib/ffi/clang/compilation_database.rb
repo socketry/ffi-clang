@@ -3,6 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2014-2025, by Samuel Williams.
+# Copyright, 2026, by Charlie Savage.
 
 require_relative "lib/compilation_database"
 
@@ -79,7 +80,7 @@ module FFI
 				# Get all compile commands.
 				# @returns [Array(CompileCommand)] Array of compile commands.
 				def commands
-					size.times.map {|i| command(i)}
+					size.times.map{|i| command(i)}
 				end
 				
 				# Iterate over each compile command.
@@ -133,7 +134,7 @@ module FFI
 				# Get all arguments.
 				# @returns [Array(String)] Array of arguments.
 				def args
-					num_args.times.map {|i| arg(i)}
+					num_args.times.map{|i| arg(i)}
 				end
 				
 				# Get the number of mapped sources.
@@ -159,7 +160,7 @@ module FFI
 				# Get all mapped sources.
 				# @returns [Array(Hash)] Array of hashes with `:path` and `:content` keys.
 				def mapped_sources
-					num_mapped_sources.times.map {|i|
+					num_mapped_sources.times.map{|i|
 						{path: mapped_source_path(i), content: mapped_source_content(i)}
 					}
 				end

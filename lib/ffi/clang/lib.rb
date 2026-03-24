@@ -13,7 +13,7 @@
 # Copyright, 2019, by Hayden Purdy.
 # Copyright, 2019, by Dominic Sisnero.
 # Copyright, 2020, by Zete Lui.
-# Copyright, 2023, by Charlie Savage.
+# Copyright, 2023-2026, by Charlie Savage.
 # Copyright, 2024, by msepga.
 
 require "ffi"

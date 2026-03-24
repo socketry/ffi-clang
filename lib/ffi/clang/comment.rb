@@ -5,6 +5,7 @@
 # Copyright, 2013-2025, by Samuel Williams.
 # Copyright, 2014, by George Pimm.
 # Copyright, 2014, by Masahiro Sano.
+# Copyright, 2026, by Charlie Savage.
 
 require_relative "lib/cursor"
 require_relative "lib/comment"
@@ -89,7 +90,7 @@ module FFI
 			# Get all child comments.
 			# @returns [Array<Comment>] An array of all child comments.
 			def children
-				num_children.times.map {|i| child(i)}
+				num_children.times.map{|i| child(i)}
 			end
 			
 			# Check if this comment is whitespace only.
@@ -152,7 +153,7 @@ module FFI
 			# Get all attributes on this tag.
 			# @returns [Array<Hash>] An array of hashes with :name and :value keys.
 			def attrs
-				num_attrs.times.map {|i|
+				num_attrs.times.map{|i|
 					{
 						name: Lib.extract_string(Lib.html_start_tag_comment_get_attr_name(@comment, i)),
 							value: Lib.extract_string(Lib.html_start_tag_comment_get_attr_value(@comment, i)),
@@ -206,7 +207,7 @@ module FFI
 			# Get all arguments to this command.
 			# @returns [Array<String>] An array of argument strings.
 			def args
-				num_args.times.map {|i|
+				num_args.times.map{|i|
 					Lib.extract_string Lib.inline_command_comment_get_arg_text(@comment, i)
 				}
 			end
@@ -248,7 +249,7 @@ module FFI
 			# Get all arguments to this command.
 			# @returns [Array<String>] An array of argument strings.
 			def args
-				num_args.times.map {|i|
+				num_args.times.map{|i|
 					Lib.extract_string Lib.block_command_comment_get_arg_text(@comment, i)
 				}
 			end

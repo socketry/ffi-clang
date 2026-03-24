@@ -9,6 +9,7 @@
 # Copyright, 2014, by Greg Hazel.
 # Copyright, 2019, by Michael Metivier.
 # Copyright, 2022, by Motonori Iwamuro.
+# Copyright, 2026, by Charlie Savage.
 
 require_relative "lib/translation_unit"
 require_relative "lib/inclusions"
@@ -200,9 +201,10 @@ module FFI
 					file = Lib.extract_string Lib.get_file_name(included_file)
 					cur_ptr = inclusion_stack
 					inclusions = []
-					include_len.times {inclusions << SourceLocation.new(Lib::CXSourceLocation.new(cur_ptr))
-																								cur_ptr += Lib::CXSourceLocation.size
-					}
+					include_len.times do
+						inclusions << SourceLocation.new(Lib::CXSourceLocation.new(cur_ptr))
+						cur_ptr += Lib::CXSourceLocation.size
+					end
 					block.call file, inclusions
 				end
 				
@@ -262,12 +264,15 @@ module FFI
 				# Get all resource usage entries.
 				# @returns [Array(Lib::CXTUResourceUsageEntry)] The resource usage entries.
 				def entries
-					ary = []
+					array = []
 					ptr = @resource_usage[:entries]
-					@resource_usage[:numEntries].times {ary << Lib::CXTUResourceUsageEntry.new(ptr)
-																																									ptr += Lib::CXTUResourceUsageEntry.size
-					}
-					ary
+					
+					@resource_usage[:numEntries].times do
+						array << Lib::CXTUResourceUsageEntry.new(ptr)
+						ptr += Lib::CXTUResourceUsageEntry.size
+					end
+					
+					return array
 				end
 			end
 		end

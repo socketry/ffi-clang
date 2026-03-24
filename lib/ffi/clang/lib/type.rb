@@ -6,7 +6,7 @@
 # Copyright, 2013, by Takeshi Watanabe.
 # Copyright, 2013-2014, by Masahiro Sano.
 # Copyright, 2014, by Niklas Therning.
-# Copyright, 2024-2025, by Charlie Savage.
+# Copyright, 2024-2026, by Charlie Savage.
 
 module FFI
 	module Clang

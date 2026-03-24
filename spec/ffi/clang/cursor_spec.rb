@@ -9,7 +9,7 @@
 # Copyright, 2014, by George Pimm.
 # Copyright, 2017, by Cameron Dutro.
 # Copyright, 2019, by Michael Metivier.
-# Copyright, 2023-2025, by Charlie Savage.
+# Copyright, 2023-2026, by Charlie Savage.
 
 describe FFI::Clang::Lib::CXCursor do
 	let(:cursor) {described_class.new}
@@ -1348,7 +1348,7 @@ describe FFI::Clang::Cursor do
 		end
 		
 		it "raises on invalid recurse parameter" do
-			expect {cursor.find_first_by_kind("yes", :cursor_class_decl)}.to raise_error(RuntimeError)
+			expect{cursor.find_first_by_kind("yes", :cursor_class_decl)}.to raise_error(RuntimeError)
 		end
 	end
 	

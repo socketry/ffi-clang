@@ -7,7 +7,7 @@
 # Copyright, 2013, by Carlos Martín Nieto.
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2019, by Michael Metivier.
-# Copyright, 2023-2024, by Charlie Savage.
+# Copyright, 2023-2026, by Charlie Savage.
 
 describe TranslationUnit do
 	before :all do
@@ -149,9 +149,9 @@ describe TranslationUnit do
 		let (:opts) {FFI::Clang::TranslationUnit.default_editing_translation_unit_options}
 		it "returns hash with symbols of TranslationUnitFlags" do
 			expect(opts).to be_kind_of(Array)
-			opts.each {|symbol|
+			opts.each do |symbol|
 				expect(FFI::Clang::Lib::TranslationUnitFlags.symbols).to include(symbol)
-			}
+			end
 		end
 	end
 	
@@ -159,9 +159,9 @@ describe TranslationUnit do
 		let (:opts) {translation_unit.default_save_options}
 		it "returns hash with symbols of SaveTranslationUnitFlags" do
 			expect(opts).to be_kind_of(Array)
-			opts.each {|symbol|
+			opts.each do |symbol|
 				expect(FFI::Clang::Lib::SaveTranslationUnitFlags.symbols).to include(symbol)
-			}
+			end
 		end
 	end
 	
@@ -199,9 +199,9 @@ describe TranslationUnit do
 		let (:opts) {translation_unit.default_reparse_options}
 		it "returns hash with symbols of ReparseFlags" do
 			expect(opts).to be_kind_of(Array)
-			opts.each {|symbol|
+			opts.each do |symbol|
 				expect(FFI::Clang::Lib::ReparseFlags.symbols).to include(symbol)
-			}
+			end
 		end
 	end
 	
@@ -216,9 +216,10 @@ describe TranslationUnit do
 		end
 		
 		it "recretes translation unit" do
-			File::open(path, "w+") {|io|
+			File::open(path, "w+") do |io|
 				io.write("int a;")
-			}
+			end
+			
 			expect(find_by_kind(@reparse_translation_unit.cursor, :cursor_variable)).to be nil
 			expect{@reparse_translation_unit.reparse}.not_to raise_error
 			expect(find_by_kind(@reparse_translation_unit.cursor, :cursor_variable).spelling).to eq("a")
@@ -260,7 +261,7 @@ describe TranslationUnit do
 			end
 			expect(files).to be_kind_of(Array)
 			expect(files.length).to be > 0
-			expect(files.any? {|f| f.include?("docs.h")}).to be true
+			expect(files.any?{|f| f.include?("docs.h")}).to be true
 		end
 	end
 	

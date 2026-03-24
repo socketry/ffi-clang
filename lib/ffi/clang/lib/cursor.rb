@@ -11,7 +11,7 @@
 # Copyright, 2014, by Niklas Therning.
 # Copyright, 2019, by Michael Metivier.
 # Copyright, 2020, by Zete Lui.
-# Copyright, 2023-2024, by Charlie Savage.
+# Copyright, 2023-2026, by Charlie Savage.
 
 require_relative "translation_unit"
 require_relative "diagnostic"

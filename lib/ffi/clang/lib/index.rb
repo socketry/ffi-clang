@@ -4,7 +4,7 @@
 # Copyright, 2010, by Jari Bakken.
 # Copyright, 2012, by Hal Brodigan.
 # Copyright, 2013-2025, by Samuel Williams.
-# Copyright, 2024, by Charlie Savage.
+# Copyright, 2024-2026, by Charlie Savage.
 
 module FFI
 	module Clang

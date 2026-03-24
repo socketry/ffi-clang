@@ -11,7 +11,7 @@
 # Copyright, 2014, by Niklas Therning.
 # Copyright, 2019, by Michael Metivier.
 # Copyright, 2022, by Motonori Iwamuro.
-# Copyright, 2023-2025, by Charlie Savage.
+# Copyright, 2023-2026, by Charlie Savage.
 
 require "set"
 require_relative "lib/cursor"

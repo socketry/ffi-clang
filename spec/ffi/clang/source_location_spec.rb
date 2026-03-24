@@ -4,7 +4,7 @@
 # Copyright, 2013, by Garry Marshall.
 # Copyright, 2013-2025, by Samuel Williams.
 # Copyright, 2014, by Masahiro Sano.
-# Copyright, 2024, by Charlie Savage.
+# Copyright, 2024-2026, by Charlie Savage.
 
 describe SourceLocation do
 	let(:translation_unit) {Index.new.parse_translation_unit(fixture_path("list.c"))}

@@ -2,7 +2,7 @@
 
 A light-weight wrapper for Ruby exposing [libclang](http://llvm.org/devmtg/2010-11/Gregor-libclang.pdf). This project is currently tested with Clang/libclang 18 and higher.
 
-[![Development Status](https://github.com/ioquatix/ffi-clang/workflows/Test/badge.svg)](https://github.com/ioquatix/ffi-clang/actions?workflow=Test)
+[![Development Status](https://github.com/socketry/ffi-clang/workflows/Test/badge.svg)](https://github.com/socketry/ffi-clang/actions?workflow=Test)
 
 ## Installation
 
@@ -50,6 +50,22 @@ We welcome contributions to this project.
 3.  Commit your changes (`git commit -am 'Add some feature'`).
 4.  Push to the branch (`git push origin my-new-feature`).
 5.  Create new Pull Request.
+
+### Running Tests
+
+To run the test suite:
+
+``` shell
+bundle exec sus
+```
+
+### Making Releases
+
+To make a new release:
+
+``` shell
+bundle exec bake gem:release:patch # or minor or major
+```
 
 ### Developer Certificate of Origin
 

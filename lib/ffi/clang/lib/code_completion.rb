@@ -3,7 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2014-2025, by Samuel Williams.
-# Copyright, 2024, by Charlie Savage.
+# Copyright, 2024-2026, by Charlie Savage.
 
 require_relative "cursor"
 require_relative "diagnostic"

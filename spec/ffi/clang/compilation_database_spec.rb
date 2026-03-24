@@ -4,6 +4,7 @@
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2014-2025, by Samuel Williams.
 # Copyright, 2020, by Zete Lui.
+# Copyright, 2026, by Charlie Savage.
 
 describe CompilationDatabase do
 	let(:dirpath) {fixture_path("")}
@@ -83,7 +84,7 @@ describe CompilationDatabase do
 			let(:spy) {double(stub: nil)}
 			it "calls block once for each CompileCommand" do
 				expect(spy).to receive(:stub).exactly(commands.size).times
-				commands.each {spy.stub}
+				commands.each{spy.stub}
 			end
 			
 			it "returns an Enumerator if no block is given" do

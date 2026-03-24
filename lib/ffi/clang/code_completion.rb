@@ -3,7 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2014-2025, by Samuel Williams.
-# Copyright, 2023-2024, by Charlie Savage.
+# Copyright, 2023-2026, by Charlie Savage.
 
 require_relative "lib/code_completion"
 
@@ -77,9 +77,9 @@ module FFI
 				# Get all diagnostics.
 				# @returns [Array(Diagnostic)] Array of diagnostics.
 				def diagnostics
-					num_diagnostics.times.map {|i|
+					num_diagnostics.times.map do |i|
 						Diagnostic.new(@translation_unit, Lib.get_code_complete_get_diagnostic(@code_complete_results, i))
-					}
+					end
 				end
 				
 				# Get the completion contexts.
@@ -247,7 +247,7 @@ module FFI
 				# Get all chunks as an array of hashes.
 				# @returns [Array(Hash)] Array of chunk hashes with `:kind`, `:text`, and `:completion` keys.
 				def chunks
-					num_chunks.times.map {|i|
+					num_chunks.times.map{|i|
 						{ kind: chunk_kind(i), text: chunk_text(i), completion: chunk_completion(i) }
 					}
 				end
@@ -280,7 +280,7 @@ module FFI
 				# Get all annotations.
 				# @returns [Array(String)] Array of annotation strings.
 				def annotations
-					num_annotations.times.map {|i|
+					num_annotations.times.map{|i|
 						Lib.extract_string Lib.get_completion_annotation(@pointer, i)
 					}
 				end

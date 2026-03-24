@@ -3,6 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2014-2025, by Samuel Williams.
+# Copyright, 2026, by Charlie Savage.
 
 describe File do
 	let(:file_list) {Index.new.parse_translation_unit(fixture_path("list.c")).file(fixture_path("list.c"))}
@@ -107,7 +108,7 @@ describe File do
 	describe "#find_includes" do
 		it "returns an Enumerator if no block is given" do
 			enumerator = file_includes.find_includes
-			included_files = enumerator.map {|cursor, range| cursor.included_file.name.tr("\\", "/")}
+			included_files = enumerator.map{|cursor, range| cursor.included_file.name.tr("\\", "/")}
 			
 			expect(enumerator).to be_kind_of(Enumerator)
 			expect(included_files).to eq([docs_header_path, extra_header_path])

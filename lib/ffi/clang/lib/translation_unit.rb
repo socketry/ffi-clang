@@ -5,7 +5,7 @@
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2019, by Hayden Purdy.
 # Copyright, 2022, by Motonori Iwamuro.
-# Copyright, 2023, by Charlie Savage.
+# Copyright, 2023-2026, by Charlie Savage.
 
 require_relative "index"
 

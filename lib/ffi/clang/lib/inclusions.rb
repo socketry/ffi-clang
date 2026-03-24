@@ -3,6 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2014, by Greg Hazel.
 # Copyright, 2014-2025, by Samuel Williams.
+# Copyright, 2026, by Charlie Savage.
 
 require_relative "file"
 require_relative "source_location"

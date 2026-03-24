@@ -258,7 +258,7 @@ describe FFI::Clang::Cursor do
 			expect(manglings.to_a).not_to be_empty
 			expect(manglings.to_a).to include(constructor.mangling)
 			expect(manglings.to_a).to all(be_kind_of(String))
-			expect(manglings.to_a).to all(satisfy {|mangling| !mangling.empty?})
+			expect(manglings.to_a).to all(satisfy{|mangling| !mangling.empty?})
 		end
 		
 		it "returns mangled symbols for destructors" do
@@ -267,7 +267,7 @@ describe FFI::Clang::Cursor do
 			expect(manglings).to be_kind_of(StringSet)
 			expect(manglings.to_a).not_to be_empty
 			expect(manglings.to_a).to all(be_kind_of(String))
-			expect(manglings.to_a).to all(satisfy {|mangling| !mangling.empty?})
+			expect(manglings.to_a).to all(satisfy{|mangling| !mangling.empty?})
 		end
 		
 		it "returns an empty string set for non-constructor cursors" do

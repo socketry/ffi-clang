@@ -5,7 +5,7 @@
 # Copyright, 2013-2025, by Samuel Williams.
 # Copyright, 2013, by Takeshi Watanabe.
 # Copyright, 2014, by Masahiro Sano.
-# Copyright, 2024, by Charlie Savage.
+# Copyright, 2024-2026, by Charlie Savage.
 
 describe FFI::Clang::Lib::CXType do
 	let(:type) {described_class.new}

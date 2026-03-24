@@ -6,7 +6,7 @@
 # Copyright, 2013-2025, by Samuel Williams.
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2019, by Hayden Purdy.
-# Copyright, 2023, by Charlie Savage.
+# Copyright, 2023-2026, by Charlie Savage.
 
 describe Index do
 	before :all do
@@ -41,7 +41,7 @@ describe Index do
 		end
 		
 		it "raises on unknown keyword options" do
-			expect {Index.new(not_a_real_option: true)}.to raise_error(ArgumentError)
+			expect{Index.new(not_a_real_option: true)}.to raise_error(ArgumentError)
 		end
 	end
 	
@@ -103,7 +103,7 @@ describe Index do
 		end
 		
 		it "raises on invalid global options" do
-			expect {index.global_options = [:not_a_real_option]}.to raise_error(FFI::Clang::Error)
+			expect{index.global_options = [:not_a_real_option]}.to raise_error(FFI::Clang::Error)
 		end
 	end
 	
@@ -122,7 +122,7 @@ describe Index do
 		end
 		
 		it "raises error when file is not found" do
-			expect {index.parse_translation_unit fixture_path("xxxxxxxxx.c")}.to raise_error(FFI::Clang::Error)
+			expect{index.parse_translation_unit fixture_path("xxxxxxxxx.c")}.to raise_error(FFI::Clang::Error)
 		end
 		
 		it "can handle command line options" do
@@ -163,7 +163,7 @@ describe Index do
 		
 		it "raises error when file is not found" do
 			expect(FileTest.exist?("not_found.ast")).to be false
-			expect {index.create_translation_unit "not_found.ast"}.to raise_error(FFI::Clang::Error)
+			expect{index.create_translation_unit "not_found.ast"}.to raise_error(FFI::Clang::Error)
 		end
 	end
 	
@@ -184,7 +184,7 @@ describe Index do
 		
 		it "raises error when file is not found" do
 			expect(FileTest.exist?("not_found.ast")).to be false
-			expect {index.create_translation_unit2("not_found.ast")}.to raise_error(FFI::Clang::Error, /cx_error_/)
+			expect{index.create_translation_unit2("not_found.ast")}.to raise_error(FFI::Clang::Error, /cx_error_/)
 		end
 	end
 	
@@ -202,7 +202,7 @@ describe Index do
 		end
 		
 		it "raises error when file is not found" do
-			expect {index.create_translation_unit_from_source_file("not_found.c")}.to raise_error(FFI::Clang::Error)
+			expect{index.create_translation_unit_from_source_file("not_found.c")}.to raise_error(FFI::Clang::Error)
 		end
 	end
 	
@@ -220,7 +220,7 @@ describe Index do
 		end
 		
 		it "raises error when file is not found" do
-			expect {index.parse_translation_unit_with_invocation("not_found.c", ["clang"])}.to raise_error(FFI::Clang::Error)
+			expect{index.parse_translation_unit_with_invocation("not_found.c", ["clang"])}.to raise_error(FFI::Clang::Error)
 		end
 	end
 	

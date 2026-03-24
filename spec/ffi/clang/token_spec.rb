@@ -3,7 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2014, by Masahiro Sano.
 # Copyright, 2014-2025, by Samuel Williams.
-# Copyright, 2024, by Charlie Savage.
+# Copyright, 2024-2026, by Charlie Savage.
 
 describe Tokens do
 	let(:translation_unit) {Index.new.parse_translation_unit(fixture_path("list.c"))}
@@ -27,7 +27,7 @@ describe Tokens do
 	it "#each" do
 		spy = double(stub: nil)
 		expect(spy).to receive(:stub).exactly(tokens.size).times
-		tokens.each {spy.stub}
+		tokens.each{spy.stub}
 	end
 	
 	it "#each returns an Enumerator if no block is given" do

@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
 	spec.version = FFI::Clang::VERSION
 	
 	spec.summary = "Ruby FFI bindings for libclang C interface."
-	spec.authors = ["Samuel Williams", "Masahiro Sano", "Charlie Savage", "Carlos Martín Nieto", "Jari Bakken", "Takeshi Watanabe", "Garry Marshall", "George Pimm", "Zete Lui", "Greg Hazel", "Michael Metivier", "Dave Wilkinson", "Hayden Purdy", "Mike Dalessio", "Motonori Iwamuro", "Niklas Therning", "Cameron Dutro", "Dominic Sisnero", "Hal Brodigan", "msepga"]
+	spec.authors = ["Samuel Williams", "Charlie Savage", "Masahiro Sano", "Carlos Martín Nieto", "Jari Bakken", "Takeshi Watanabe", "Garry Marshall", "George Pimm", "Zete Lui", "Greg Hazel", "Michael Metivier", "Dave Wilkinson", "Hayden Purdy", "Mike Dalessio", "Motonori Iwamuro", "Niklas Therning", "Cameron Dutro", "Dominic Sisnero", "Hal Brodigan", "msepga"]
 	spec.license = "MIT"
 	
 	spec.cert_chain  = ["release.cert"]

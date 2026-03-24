@@ -14,11 +14,11 @@ describe IndexAction do
 	let(:root_cursor) {translation_unit.cursor}
 	let(:main_file) {translation_unit.file}
 	let(:included_file) {translation_unit.file(included_header)}
-	let(:global_value_cursor) {find_matching(root_cursor) {|cursor, _parent| cursor.kind == :cursor_variable && cursor.spelling == "global_value"}}
-	let(:use_global_cursor) {find_matching(root_cursor) {|cursor, _parent| cursor.kind == :cursor_function && cursor.spelling == "use_global"}}
-	let(:extra_function_cursor) {find_matching(root_cursor) {|cursor, _parent| cursor.kind == :cursor_function && cursor.spelling == "extra_function"}}
-	let(:global_value_reference_cursor) {find_matching(root_cursor) {|cursor, _parent| cursor.kind == :cursor_decl_ref_expr && cursor.spelling == "global_value"}}
-	let(:extra_function_reference_cursor) {find_matching(root_cursor) {|cursor, _parent| cursor.kind == :cursor_call_expr && cursor.spelling == "extra_function"}}
+	let(:global_value_cursor) {find_matching(root_cursor){|cursor, _parent| cursor.kind == :cursor_variable && cursor.spelling == "global_value"}}
+	let(:use_global_cursor) {find_matching(root_cursor){|cursor, _parent| cursor.kind == :cursor_function && cursor.spelling == "use_global"}}
+	let(:extra_function_cursor) {find_matching(root_cursor){|cursor, _parent| cursor.kind == :cursor_function && cursor.spelling == "extra_function"}}
+	let(:global_value_reference_cursor) {find_matching(root_cursor){|cursor, _parent| cursor.kind == :cursor_decl_ref_expr && cursor.spelling == "global_value"}}
+	let(:extra_function_reference_cursor) {find_matching(root_cursor){|cursor, _parent| cursor.kind == :cursor_call_expr && cursor.spelling == "extra_function"}}
 	
 	def build_entity_info(cursor, kind, name, usr = "usr:#{name}")
 		info = FFI::Clang::Lib::CXIdxEntityInfo.new
@@ -123,7 +123,7 @@ describe IndexAction do
 		expect(returned_translation_unit).to eq(translation_unit)
 		expect(events.map(&:first)).to include(:started_translation_unit, :entered_main_file, :included_file, :declaration, :diagnostic, :reference)
 		
-		main_file = events.find {|event, _payload| event == :entered_main_file}.last
+		main_file = events.find{|event, _payload| event == :entered_main_file}.last
 		expect(main_file).to be_kind_of(FFI::Clang::File)
 		expect(main_file.name).to eq(source_file)
 		
@@ -137,26 +137,26 @@ describe IndexAction do
 		expect(included_file.angled?).to be false
 		expect(included_file.module_import?).to be false
 		
-		declarations = events.select {|event, _payload| event == :declaration}.map(&:last)
-		expect(declarations.map {|declaration| declaration.entity&.name}).to include("global_value", "use_global")
+		declarations = events.select{|event, _payload| event == :declaration}.map(&:last)
+		expect(declarations.map{|declaration| declaration.entity&.name}).to include("global_value", "use_global")
 		
-		use_global = declarations.find {|declaration| declaration.entity&.name == "use_global"}
+		use_global = declarations.find{|declaration| declaration.entity&.name == "use_global"}
 		expect(use_global).to be_kind_of(IndexAction::Declaration)
 		expect(use_global.definition?).to be true
 		expect(use_global.cursor.spelling).to eq("use_global")
 		
-		diagnostics = events.select {|event, _payload| event == :diagnostic}.map(&:last)
+		diagnostics = events.select{|event, _payload| event == :diagnostic}.map(&:last)
 		expect(diagnostics.length).to eq(1)
 		expect(diagnostics.first.length).to eq(1)
 		expect(diagnostics.first.first).to equal(@diagnostic_payload)
 		
-		references = events.select {|event, _payload| event == :reference}.map(&:last)
-		expect(references.map {|reference| reference.referenced_entity&.name}).to include("global_value", "extra_function")
+		references = events.select{|event, _payload| event == :reference}.map(&:last)
+		expect(references.map{|reference| reference.referenced_entity&.name}).to include("global_value", "extra_function")
 		
-		global_value_reference = references.find {|reference| reference.referenced_entity&.name == "global_value"}
+		global_value_reference = references.find{|reference| reference.referenced_entity&.name == "global_value"}
 		expect(global_value_reference.roles).to include(:reference)
 		
-		extra_function_reference = references.find {|reference| reference.referenced_entity&.name == "extra_function"}
+		extra_function_reference = references.find{|reference| reference.referenced_entity&.name == "extra_function"}
 		expect(extra_function_reference.roles).to include(:call)
 	end
 	
@@ -174,7 +174,7 @@ describe IndexAction do
 		
 		expect(returned_translation_unit).to eq(translation_unit)
 		
-		use_global = declarations.find {|declaration| declaration.entity&.name == "use_global"}
+		use_global = declarations.find{|declaration| declaration.entity&.name == "use_global"}
 		expect(use_global.cursor.translation_unit).to eq(translation_unit)
 		expect(use_global.entity.cursor.translation_unit).to eq(translation_unit)
 	end
@@ -214,7 +214,7 @@ describe IndexAction do
 		allow(FFI::Clang::Lib).to receive(:index_source_file).and_return(:cx_error_failure)
 		
 		expect do
-			action.index_source_file(source_file, command_line_args, [], [], translation_unit_opts) {}
+			action.index_source_file(source_file, command_line_args, [], [], translation_unit_opts){}
 		end.to raise_error(FFI::Clang::Error, /cx_error_failure/)
 	end
 	
@@ -242,7 +242,7 @@ describe Index do
 		expect(index).to receive(:create_action).and_return(action)
 		expect(action).to receive(:index_source_file).with(source_file, command_line_args, [], [], translation_unit_opts).and_return(translation_unit)
 		
-		expect(index.index_source_file(source_file, command_line_args, [], [], translation_unit_opts) {}).to eq(translation_unit)
+		expect(index.index_source_file(source_file, command_line_args, [], [], translation_unit_opts){}).to eq(translation_unit)
 	end
 	
 	it "provides a convenience full invocation indexing method" do
@@ -252,7 +252,7 @@ describe Index do
 		expect(index).to receive(:create_action).and_return(action)
 		expect(action).to receive(:index_source_file_with_invocation).with(source_file, full_argv, [], [], translation_unit_opts).and_return(translation_unit)
 		
-		expect(index.index_source_file_with_invocation(source_file, full_argv, [], [], translation_unit_opts) {}).to eq(translation_unit)
+		expect(index.index_source_file_with_invocation(source_file, full_argv, [], [], translation_unit_opts){}).to eq(translation_unit)
 	end
 	
 	it "provides a convenience translation unit indexing method" do
@@ -261,6 +261,6 @@ describe Index do
 		expect(index).to receive(:create_action).and_return(action)
 		expect(action).to receive(:index_translation_unit).with(translation_unit, []).and_return(translation_unit)
 		
-		expect(index.index_translation_unit(translation_unit) {}).to eq(translation_unit)
+		expect(index.index_translation_unit(translation_unit){}).to eq(translation_unit)
 	end
 end
