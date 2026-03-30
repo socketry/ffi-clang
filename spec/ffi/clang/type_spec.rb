@@ -731,7 +731,7 @@ describe FFI::Clang::Types::Type do
 		it "returns incomplete type for Ptr<Impl>" do
 			arg_type = template_with_incomplete.template_argument_type(0)
 			expect(arg_type).to be_kind_of(Types::Type)
-			expect(arg_type.kind).to eq(:type_elaborated)
+			expect([:type_elaborated, :type_record]).to include(arg_type.kind)
 			expect(arg_type.declaration.kind).to eq(:cursor_class_decl)
 			expect(arg_type.declaration.spelling).to eq("Impl")
 		end
@@ -794,12 +794,12 @@ describe FFI::Clang::Types::Pointer do
 		
 		it "returns true for pointers to forward-declared types" do
 			expect(forward_ptr_type).to be_kind_of(Types::Pointer)
-			expect(forward_ptr_type.forward_declaration?).to eq(true)
+			expect(forward_ptr_type.forward_declaration?).to be true
 		end
 		
 		it "returns false for pointers to fully-defined types" do
 			expect(full_ptr_type).to be_kind_of(Types::Pointer)
-			expect(full_ptr_type.forward_declaration?).to eq(false)
+			expect(full_ptr_type.forward_declaration?).to be false
 		end
 	end
 end
@@ -859,10 +859,15 @@ describe FFI::Clang::Types::Elaborated do
 		end
 		
 		it "returns the named type" do
-			expect(elaborated_type).to be_kind_of(Types::Elaborated)
-			named = elaborated_type.named_type
-			expect(named).to be_kind_of(Types::Record)
-			expect(named.spelling).to eq("SimpleStruct")
+			# Newer clang versions (22+) may return Record directly instead of Elaborated
+			if elaborated_type.is_a?(Types::Elaborated)
+				named = elaborated_type.named_type
+				expect(named).to be_kind_of(Types::Record)
+				expect(named.spelling).to eq("SimpleStruct")
+			else
+				expect(elaborated_type).to be_kind_of(Types::Record)
+				expect(elaborated_type.spelling).to include("SimpleStruct")
+			end
 		end
 	end
 	
@@ -874,8 +879,9 @@ describe FFI::Clang::Types::Elaborated do
 		end
 		
 		it "returns false for non-anonymous elaborated types" do
-			expect(non_anonymous).to be_kind_of(Types::Elaborated)
-			expect(non_anonymous.anonymous?).to be false
+			# Newer clang versions (22+) may return Record directly instead of Elaborated
+			expect(non_anonymous).to be_kind_of(Types::Elaborated).or be_kind_of(Types::Record)
+			expect(non_anonymous.anonymous?).to be_falsey
 		end
 	end
 	
@@ -887,8 +893,13 @@ describe FFI::Clang::Types::Elaborated do
 		end
 		
 		it "returns false when canonical type is not a pointer" do
-			expect(non_pointer).to be_kind_of(Types::Elaborated)
-			expect(non_pointer.pointer?).to be false
+			# Newer clang versions (22+) may return Record directly instead of Elaborated.
+			# Record does not have a pointer? method, so only test on Elaborated.
+			if non_pointer.is_a?(Types::Elaborated)
+				expect(non_pointer.pointer?).to be false
+			else
+				expect(non_pointer).to be_kind_of(Types::Record)
+			end
 		end
 	end
 end

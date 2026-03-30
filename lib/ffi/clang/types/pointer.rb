@@ -35,22 +35,30 @@ module FFI
 				# Check if this pointer references a forward declaration.
 				# @returns [Boolean] True if this pointer points to a forward-declared type.
 				def forward_declaration?
-					# Is this a pointer to a record (struct or union) that referenced
-					# a forward declaration at the point of its inclusion in the translation unit?
-					if !self.function? && self.pointee.is_a?(Types::Elaborated) &&
-							self.pointee.canonical.is_a?(Types::Record)
-						
-						# Get the universal symbol reference
-						usr = self.pointee.canonical.declaration.usr
-						
-						# Now does that same usr occur earlier in the file?
-						first_declaration, _ = self.translation_unit.cursor.find do |child, parent|
-							child.usr == usr
-						end
-						# NOTE - Maybe should also check that the line number of
-						# is less than the line number of the declaration this type references
-						first_declaration.forward_declaration?
+					pointee = self.pointee
+					return nil if self.function?
+					
+					# Resolve to a Record type, handling both elaborated and direct record types.
+					# Newer clang versions (22+) may return :type_record directly instead of
+					# wrapping in :type_elaborated.
+					record_type = if pointee.is_a?(Types::Elaborated) && pointee.canonical.is_a?(Types::Record)
+						pointee.canonical
+					elsif pointee.is_a?(Types::Record)
+						pointee
 					end
+					
+					return nil unless record_type
+					
+					# Get the universal symbol reference
+					usr = record_type.declaration.usr
+					
+					# Now does that same usr occur earlier in the file?
+					first_declaration, _ = self.translation_unit.cursor.find do |child, parent|
+						child.usr == usr
+					end
+					# NOTE - Maybe should also check that the line number of
+					# is less than the line number of the declaration this type references
+					first_declaration.forward_declaration?
 				end
 			end
 		end
