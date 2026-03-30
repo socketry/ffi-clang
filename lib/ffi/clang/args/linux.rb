@@ -10,11 +10,23 @@ module FFI
 			private
 			
 			def find_libclang_paths
-				if llvm_library_dir
-					return [::File.join(llvm_library_dir, "libclang.so")]
+				prefix = llvm_library_dir
+				
+				paths = versions.flat_map do |version|
+					5.downto(0).map do |minor|
+						libclang_path(prefix, "libclang.so.#{version}.#{minor}")
+					end
 				end
 				
-				["clang"]
+				paths.concat(versions.map do |version|
+					libclang_path(prefix, "libclang.so.#{version}")
+				end)
+				
+				paths << libclang_path(prefix, "libclang.so")
+			end
+			
+			def libclang_path(prefix, name)
+				prefix ? ::File.join(prefix, name) : name
 			end
 		end
 	end
