@@ -4,7 +4,6 @@
 # Copyright, 2026, by Charlie Savage.
 
 require "open3"
-require "mkmf"
 
 module FFI
 	module Clang
@@ -79,6 +78,10 @@ module FFI
 			
 			private
 			
+			def versions
+				22.downto(17)
+			end
+			
 			# Platform-specific extra args beyond -resource-dir.
 			# Subclasses override as needed.
 			# @parameter command_line_args [Array(String)] The existing command line arguments.
@@ -100,7 +103,7 @@ module FFI
 				@llvm_config = ENV["LLVM_CONFIG"]
 				
 				unless @llvm_config || ENV["LLVM_VERSION"]
-					@llvm_config = MakeMakefile.find_executable("llvm-config")
+					@llvm_config = "llvm-config"
 				end
 				
 				@llvm_config
@@ -111,7 +114,7 @@ module FFI
 			def llvm_library_dir
 				return nil unless llvm_config
 				
-				@llvm_library_dir ||= `#{llvm_config} --libdir`.chomp
+				@llvm_library_dir ||= run_command(llvm_config, "--libdir")
 			end
 			
 			# Query llvm-config for its binary directory.
@@ -119,18 +122,23 @@ module FFI
 			def llvm_bin_dir
 				return nil unless llvm_config
 				
-				@llvm_bin_dir ||= `#{llvm_config} --bindir`.chomp
+				@llvm_bin_dir ||= run_command(llvm_config, "--bindir")
 			end
 			
 			# Ask a clang binary for its resource directory.
 			# @parameter clang [String] Path to or name of the clang binary.
 			# @returns [String | Nil] The resource directory path, or nil.
 			def resource_dir_from_clang(clang)
-				stdout, _stderr, status = Open3.capture3(clang, "-print-resource-dir")
+				dir = run_command(clang, "-print-resource-dir")
+				valid_resource_dir?(dir) ? dir : nil
+			end
+			
+			def run_command(*command)
+				stdout, _stderr, status = Open3.capture3(*command)
 				return nil unless status.success?
 				
-				dir = stdout.strip
-				valid_resource_dir?(dir) ? dir : nil
+				output = stdout.strip
+				output.empty? ? nil : output
 			rescue Errno::ENOENT
 				nil
 			end
@@ -177,8 +185,8 @@ module FFI
 				return env if valid_resource_dir?(env)
 				
 				# 2. Clang binary from llvm-config.
-				if llvm_config
-					clang_path = ::File.join(llvm_bin_dir, "clang")
+				if (bin_dir = llvm_bin_dir)
+					clang_path = ::File.join(bin_dir, "clang")
 					if (dir = resource_dir_from_clang(clang_path))
 						return dir
 					end

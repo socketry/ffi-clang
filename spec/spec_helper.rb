@@ -17,6 +17,7 @@ if ENV["COVERAGE"]
 	end
 end
 
+require "fileutils"
 require_relative "../lib/ffi/clang"
 
 include FFI::Clang
