@@ -132,11 +132,11 @@ module FFI
 				dir = run_command(clang, "-print-resource-dir")
 				valid_resource_dir?(dir) ? dir : nil
 			end
-
+			
 			def run_command(*command)
 				stdout, _stderr, status = Open3.capture3(*command)
 				return nil unless status.success?
-
+				
 				output = stdout.strip
 				output.empty? ? nil : output
 			rescue Errno::ENOENT
