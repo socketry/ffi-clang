@@ -4,7 +4,6 @@
 # Copyright, 2026, by Charlie Savage.
 
 require "open3"
-require "mkmf"
 
 module FFI
 	module Clang
@@ -100,7 +99,7 @@ module FFI
 				@llvm_config = ENV["LLVM_CONFIG"]
 				
 				unless @llvm_config || ENV["LLVM_VERSION"]
-					@llvm_config = MakeMakefile.find_executable("llvm-config")
+					@llvm_config = "llvm-config"
 				end
 				
 				@llvm_config
