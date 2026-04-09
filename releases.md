@@ -1,6 +1,6 @@
 # Releases
 
-## Unreleased
+## v0.15.1
 
   - Use `-isystem` instead of `-I` for auto-discovered MSVC system include paths so that `in_system_header?` correctly identifies system headers.
 
@@ -11,7 +11,7 @@
   - Add macOS support using Xcode's built-in clang/libclang.
   - Add Windows MSVC (mswin) support using Visual Studio's bundled LLVM/Clang, including system include path discovery via `vcvarsall.bat` and `clang-cl`.
   - Improve Windows MinGW support.
-  - Work around LLVM bug [#154361](https://github.com/llvm/llvm-project/pull/171465) where `FreeLibrary` on `libclang.dll` crashes during process exit due to dangling Fiber Local Storage callbacks (fixed in LLVM 22.1.0).
+  - Work around LLVM bug [\#154361](https://github.com/llvm/llvm-project/pull/171465) where `FreeLibrary` on `libclang.dll` crashes during process exit due to dangling Fiber Local Storage callbacks (fixed in LLVM 22.1.0).
 
 ### Breaking Changes
 
@@ -65,45 +65,45 @@
 
 ## v0.13.0
 
-  - Add support for `clang_Type_getNamedType`. (#90)
-  - Try clang v18 + add Ruby v3.4 to test matrix. (#91)
+  - Add support for `clang_Type_getNamedType`. (\#90)
+  - Try clang v18 + add Ruby v3.4 to test matrix. (\#91)
 
 ## v0.12.0
 
-  - Prefer `LIBCLANG` and `LLVM_CONFIG` overrides over Xcode. (#88)
+  - Prefer `LIBCLANG` and `LLVM_CONFIG` overrides over Xcode. (\#88)
 
 ## v0.11.0
 
-  - Restore `visit_children` method. Fixes #82. (#84)
-  - Expose Clang's exception specification API. (#87)
-  - Support iterating over `Type::Function` args and expose `Lib.get_non_reference_type`. (#85)
-  - Fix qualified name. (#83)
-  - Update clang version. (#86)
+  - Restore `visit_children` method. Fixes \#82. (\#84)
+  - Expose Clang's exception specification API. (\#87)
+  - Support iterating over `Type::Function` args and expose `Lib.get_non_reference_type`. (\#85)
+  - Fix qualified name. (\#83)
+  - Update clang version. (\#86)
 
 ## v0.10.0
 
-  - Expose libclang's anonymous methods. (#79)
-  - Use Enumerable. (#80)
-  - Split `FFI::Clang::Type` into a number of more cohesive subclasses inheriting from `FFI::Clang::Types::Type`. (#81)
+  - Expose libclang's anonymous methods. (\#79)
+  - Use Enumerable. (\#80)
+  - Split `FFI::Clang::Type` into a number of more cohesive subclasses inheriting from `FFI::Clang::Types::Type`. (\#81)
 
 ## v0.9.0
 
-  - Remove duplicate mapping of `clang_getEnumDeclIntegerType`. (#67)
-  - Update bitmask options based on enums to always be an array of symbols. (#69)
-  - Add support for `parse_translation_unit2` API. (#70)
-  - Cursor improvements, Type improvements, Printing support. (#72)
-  - Fix finalizer exception in `FFI::Clang::CodeCompletion::Results`. (#74)
-  - Fix Clang 16 compatibility. (#76)
-  - Cursor location methods. (#78)
+  - Remove duplicate mapping of `clang_getEnumDeclIntegerType`. (\#67)
+  - Update bitmask options based on enums to always be an array of symbols. (\#69)
+  - Add support for `parse_translation_unit2` API. (\#70)
+  - Cursor improvements, Type improvements, Printing support. (\#72)
+  - Fix finalizer exception in `FFI::Clang::CodeCompletion::Results`. (\#74)
+  - Fix Clang 16 compatibility. (\#76)
+  - Cursor location methods. (\#78)
 
 ## v0.8.0
 
-  - Modernize gem. (#58)
-  - Test on clang 5.0+. (#59)
-  - Fix `CXCursor_TranslationUnit` enum value to 350. (#61)
-  - Add `Cursor#hash` and `Cursor#eql?`. (#62)
-  - Set `cursor_translation_unit` enum value based on the Clang version. (#64)
-  - Add various C++ introspection methods. (#66)
+  - Modernize gem. (\#58)
+  - Test on clang 5.0+. (\#59)
+  - Fix `CXCursor_TranslationUnit` enum value to 350. (\#61)
+  - Add `Cursor#hash` and `Cursor#eql?`. (\#62)
+  - Set `cursor_translation_unit` enum value based on the Clang version. (\#64)
+  - Add various C++ introspection methods. (\#66)
 
 ## v0.7.0
 
@@ -126,42 +126,42 @@
   - Modernize code base, Clang v3.4+ only.
   - Get text from `SourceRange`.
   - Integrate `find_*` into `Cursor`.
-  - Test case for method calls inside classes. (#36)
+  - Test case for method calls inside classes. (\#36)
 
 ## v0.3.0
 
-  - Find and use `llvm-config`. (#38)
+  - Find and use `llvm-config`. (\#38)
   - Recognize Xcode 7.
   - Add functions needed by RoboVM's bro-gen script.
 
 ## v0.2.1
 
-  - Add inclusions support. (#32)
+  - Add inclusions support. (\#32)
   - Update unit tests for RSpec 3.
-  - Add `CompilationDatabase`. (#27)
-  - Only use `.dylib` on Darwin. (#29)
+  - Add `CompilationDatabase`. (\#27)
+  - Only use `.dylib` on Darwin. (\#29)
 
 ## v0.2.0
 
   - Add clang version string APIs.
-  - Add cursor functions (except Objective-C). (#9)
-  - Add type kind and cursor kind enums. (#8)
-  - Add `TranslationUnit` reference to `Cursor` and `Type`. (#11)
-  - Multi-version libclang testing via Travis. (#10)
+  - Add cursor functions (except Objective-C). (\#9)
+  - Add type kind and cursor kind enums. (\#8)
+  - Add `TranslationUnit` reference to `Cursor` and `Type`. (\#11)
+  - Multi-version libclang testing via Travis. (\#10)
 
 ## v0.1.3
 
-  - Add `CXType` support. (#5)
+  - Add `CXType` support. (\#5)
   - Correct camelCase `displayName` to `display_name`.
 
 ## v0.1.2
 
-  - Initial support for source comments. (#4)
+  - Initial support for source comments. (\#4)
   - Use different classes for comment types.
 
 ## v0.1.1
 
-  - Support unsaved files. (#3)
+  - Support unsaved files. (\#3)
   - Add `Cursor` visitor function taking a block.
   - Add null cursor and `clang_is*` functions.
   - Add `SourceLocation` from diagnostic.

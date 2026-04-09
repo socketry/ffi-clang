@@ -41,6 +41,10 @@ For example, to use a specific LLVM installation:
 
 Please see the [project releases](https://socketry.github.io/ffi-clang/releases/index) for all releases.
 
+### v0.15.1
+
+  - Use `-isystem` instead of `-I` for auto-discovered MSVC system include paths so that `in_system_header?` correctly identifies system headers.
+
 ### v0.15.0
 
   - [Platform Support](https://socketry.github.io/ffi-clang/releases/index#platform-support)
@@ -108,10 +112,6 @@ Please see the [project releases](https://socketry.github.io/ffi-clang/releases/
   - Allow retrieval of list of references from a Cursor.
   - Implement libclang `findReferencesInFile` functionality.
   - Allow `TranslationUnit#file` to return the main file.
-
-### v0.6.0
-
-  - Add missing translation unit parse flags.
 
 ## Contributing
 
