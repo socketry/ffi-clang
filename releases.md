@@ -1,6 +1,9 @@
 # Releases
 
-## Unreleased   
+## v0.15.1
+- Use `-isystem` instead of `-I` for auto-discovered MSVC system include paths so that `in_system_header?` correctly identifies system headers.
+
+## v0.15.0
 
 ### Platform Support
 
