@@ -84,7 +84,7 @@ module FFI
 				
 				system_includes.each do |path|
 					unless command_line_args.include?(path)
-						args.push("-I", path)
+						args.push("-isystem", path)
 					end
 				end
 				
