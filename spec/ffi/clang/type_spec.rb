@@ -788,7 +788,6 @@ describe FFI::Clang::Types::Type do
 		end
 		
 		it "returns the fully qualified type name" do
-			skip unless FFI::Clang.clang_version >= Gem::Version.new("21.0.0")
 			policy = FFI::Clang::PrintingPolicy.new(my_struct.cursor)
 			name = my_struct.type.fully_qualified_name(policy)
 			expect(name).to include("MyNamespace")
@@ -796,10 +795,208 @@ describe FFI::Clang::Types::Type do
 		end
 		
 		it "prepends :: with global ns prefix" do
-			skip unless FFI::Clang.clang_version >= Gem::Version.new("21.0.0")
 			policy = FFI::Clang::PrintingPolicy.new(my_struct.cursor)
 			name = my_struct.type.fully_qualified_name(policy, with_global_ns_prefix: true)
 			expect(name).to start_with("::")
+		end
+		
+		# Cases that should produce identical output whether routed through
+		# the shim (fqn_impl) or the public dispatcher (fully_qualified_name,
+		# which calls native clang_getFullyQualifiedName on libclang 21+ and
+		# the shim otherwise). Each calling describe sets `fqn_for` to a
+		# lambda that selects which path to test.
+		shared_examples "fully_qualified_name implementations" do
+			it "spells a fundamental type by its spelling" do
+				int_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_field_decl and child.spelling == "int_member_a"
+				end.type
+				expect(fqn_for.call(int_type)).to eq("int")
+			end
+			
+			it "spells an lvalue reference with `&`" do
+				ref_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_cxx_method and child.spelling == "takesARef"
+				end.type.arg_types.to_a[0]
+				expect(fqn_for.call(ref_type)).to eq("int &")
+			end
+			
+			it "spells an rvalue reference with `&&`" do
+				ref_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_cxx_method and child.spelling == "takesARef"
+				end.type.arg_types.to_a[1]
+				expect(fqn_for.call(ref_type)).to eq("float &&")
+			end
+			
+			it "spells a single pointer with `*`" do
+				ptr_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_typedef_decl and child.spelling == "const_int_ptr"
+				end.type.canonical
+				expect(fqn_for.call(ptr_type)).to eq("const int *")
+			end
+			
+			it "spells a pointer-to-pointer with `**`" do
+				pp_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_typedef_decl and child.spelling == "int_pp"
+				end.type.canonical
+				expect(fqn_for.call(pp_type)).to eq("int **")
+			end
+			
+			it "spells a constant array with size" do
+				array_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_variable and child.spelling == "int_array"
+				end.type
+				expect(fqn_for.call(array_type)).to eq("int[8]")
+			end
+			
+			it "preserves the typedef alias name rather than expanding to the underlying type" do
+				# const_int_ptr is the alias; canonical is `const int *`. fqn
+				# returns the alias spelling here, not the canonical form.
+				typedef_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_typedef_decl and child.spelling == "const_int_ptr"
+				end.type
+				expect(fqn_for.call(typedef_type)).to eq("const_int_ptr")
+			end
+			
+			it "qualifies a class template specialization including its type arguments" do
+				# Field `data` in class `Container` is `Ptr<int>`.
+				template_type = find_matching(cursor_templates) do |child, parent|
+					child.kind == :cursor_field_decl and child.spelling == "data"
+				end.type
+				expect(fqn_for.call(template_type)).to eq("Ptr<int>")
+			end
+			
+			it "spells an incomplete array with empty brackets" do
+				array_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_variable and child.spelling == "int_array_unknown"
+				end.type
+				expect(fqn_for.call(array_type)).to eq("int[]")
+			end
+			
+			it "spells `*const` qualifier on a pointer chain" do
+				# `int * const` — pointer is const, pointee is non-const int.
+				ptr_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_typedef_decl and child.spelling == "int_ptr_const"
+				end.type.canonical
+				expect(fqn_for.call(ptr_type)).to eq("int *const")
+			end
+			
+			it "spells a function pointer with parameter list" do
+				# `typedef void (*FnPtr)(int, float);`
+				fnptr_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_typedef_decl and child.spelling == "FnPtr"
+				end.type.canonical
+				expect(fqn_for.call(fnptr_type)).to eq("void (*)(int, float)")
+			end
+			
+			it "spells an enum type with its qualified name" do
+				enum_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_variable and child.spelling == "normal_enum_var"
+				end.type
+				expect(fqn_for.call(enum_type)).to eq("normal_enum")
+			end
+			
+			it "collapses an inline namespace in the fully qualified name" do
+				# Variable cv_outer_net is `cv_outer::cv_v1::Net` per
+				# qualified_name (because cv_v1 is inline). fqn must use
+				# decl.type.spelling which collapses the inline ns and
+				# produce `cv_outer::Net`.
+				net_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_variable and child.spelling == "cv_outer_net"
+				end.type
+				expect(fqn_for.call(net_type)).to eq("cv_outer::Net")
+			end
+			
+			it "qualifies a multi-argument template specialization" do
+				pair_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_variable and child.spelling == "pair_id"
+				end.type
+				expect(fqn_for.call(pair_type)).to eq("Pair<int, double>")
+			end
+			
+			it "recursively qualifies nested template arguments" do
+				pair_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_variable and child.spelling == "pair_nested"
+				end.type
+				expect(fqn_for.call(pair_type)).to eq("Pair<int, Pair<float, double>>")
+			end
+			
+			it "preserves non-type template arguments via spelling" do
+				# `Buf<int, 5>` — `5` is a non-type template arg that
+				# template_argument_type reports as :type_invalid; the shim
+				# falls back to parsing it from the type's spelling. Native
+				# preserves it through its own AST traversal.
+				buf_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_variable and child.spelling == "buf_int_5"
+				end.type
+				expect(fqn_for.call(buf_type)).to eq("Buf<int, 5>")
+			end
+			
+			it "preserves an alias template name rather than expanding to its target" do
+				# `alias_ns::BoxAlias<int>` — alias of `alias_ns::Box<int>`.
+				# fqn detects the alias and preserves it.
+				box_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_variable and child.spelling == "box_alias_int"
+				end.type
+				expect(fqn_for.call(box_type)).to eq("alias_ns::BoxAlias<int>")
+			end
+			
+			it "prepends `const` for const-qualified class types" do
+				# `typedef const A const_A_alias;` — canonical is `const A`.
+				const_type = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_typedef_decl and child.spelling == "const_A_alias"
+				end.type.canonical
+				expect(fqn_for.call(const_type)).to eq("const A")
+			end
+		end
+		
+		# Run the portable cases through the shim path. This guarantees
+		# the shim is exercised even on libclang 21+ where the public
+		# method dispatches to clang_getFullyQualifiedName.
+		describe "shim implementation (fqn_impl)" do
+			let(:fqn_for) {->(type){type.fqn_impl(nil)}}
+			
+			include_examples "fully_qualified_name implementations"
+			
+			it "leaves a nested typedef in a class template specialization unqualified (unfixable libclang limitation)" do
+				# For `ContainerWithIter<int>::value_type`, the typedef
+				# cursor's semantic_parent is the class TEMPLATE (kind
+				# :cursor_class_template), not the specialization. libclang
+				# does not expose the template args from this position, so
+				# the shim cannot recover them. Native
+				# clang_getFullyQualifiedName produces
+				# "ContainerWithIter<int>::value_type" via internal AST data
+				# the C API does not surface.
+				method = find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_cxx_method and child.spelling == "get"
+				end
+				return_type = method.type.result_type
+				
+				# Make the gap explicit: the shim does NOT produce the fully
+				# qualified form that native libclang 21+ does. The exact
+				# fallback spelling differs across libclang versions (some
+				# produce "ContainerWithIter::value_type", others just
+				# "value_type"), but in every case the `<int>` template arg
+				# is missing because libclang doesn't surface it from the
+				# typedef's :cursor_class_template semantic_parent.
+				expect(return_type.fqn_impl(nil)).not_to include("<int>")
+				expect(return_type.fqn_impl(nil)).not_to eq("ContainerWithIter<int>::value_type")
+			end
+		end
+		
+		# Run the same portable cases through the public method, which
+		# dispatches to clang_getFullyQualifiedName on libclang 21+ and to
+		# the shim on earlier versions. On libclang 21+ this verifies the
+		# shim's expected output matches native bit-for-bit.
+		describe "public method (fully_qualified_name)" do
+			let(:policy_cursor) do
+				find_matching(cursor_cxx) do |child, parent|
+					child.kind == :cursor_struct and child.spelling == "A"
+				end
+			end
+			let(:policy) {FFI::Clang::PrintingPolicy.new(policy_cursor.cursor)}
+			let(:fqn_for) {->(type){type.fully_qualified_name(policy)}}
+			
+			include_examples "fully_qualified_name implementations"
 		end
 	end
 	
