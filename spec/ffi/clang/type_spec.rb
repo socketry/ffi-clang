@@ -282,6 +282,41 @@ describe FFI::Clang::Types::Type do
 		end
 	end
 	
+	describe "#copyable?" do
+		let(:cursor_types) {Index.new.parse_translation_unit(fixture_path("types.cxx")).cursor}
+		
+		it "returns true for a copyable struct type" do
+			type = find_matching(cursor_types) do |child, parent|
+				child.kind == :cursor_struct and child.spelling == "SimpleStruct"
+			end.type
+			expect(type.copyable?).to be true
+		end
+		
+		it "returns false for a struct type with deleted copy constructor" do
+			type = find_matching(cursor_types) do |child, parent|
+				child.kind == :cursor_struct and child.spelling == "DeletedCopy"
+			end.type
+			expect(type.copyable?).to be false
+		end
+		
+		it "strips a reference before consulting the declaration" do
+			# A reference to DeletedCopy should be reported as not copyable —
+			# copyable? operates on the underlying type, not the reference.
+			ref_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_cxx_method and child.spelling == "takesARef"
+			end.type.arg_types.to_a[0]
+			expect(ref_type.kind).to eq(:type_lvalue_ref)
+			expect(ref_type.copyable?).to be true # int& → int → copyable
+		end
+		
+		it "returns true for a fundamental type" do
+			int_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_field_decl and child.spelling == "int_member_a"
+			end.type
+			expect(int_type.copyable?).to be true
+		end
+	end
+	
 	describe "#const_qualified?" do
 		let(:pointer_type) do
 			find_matching(cursor_cxx) do |child, parent|

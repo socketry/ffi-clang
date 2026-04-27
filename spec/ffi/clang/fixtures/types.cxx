@@ -49,6 +49,19 @@ struct DeletedCopy {
 	DeletedCopy& operator=(DeletedCopy&&) = default;
 };
 
+// Private copy constructor — not copyable.
+class PrivateCopy {
+private:
+	PrivateCopy(const PrivateCopy&);
+public:
+	PrivateCopy();
+};
+
+// Inherits from a non-copyable base — not transitively copyable.
+struct InheritsDeletedCopy : public DeletedCopy {
+	int value;
+};
+
 // Explicit constructor
 struct ExplicitCtor {
 	explicit ExplicitCtor(int x);
