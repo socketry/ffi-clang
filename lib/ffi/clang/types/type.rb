@@ -233,11 +233,236 @@ module FFI
 				end
 				
 				# Get the fully qualified name of this type.
-				# @parameter policy [PrintingPolicy] The printing policy to use.
+				#
+				# On libclang 21+ this dispatches to clang_getFullyQualifiedName.
+				# On earlier libclang versions it falls back to a Ruby shim that
+				# composes existing libclang APIs (declaration, qualified_name,
+				# template arguments, pointer/array/reference unwrapping, etc.).
+				#
+				# Known shim limitation: STL container typedefs that depend on
+				# default template arguments (e.g., `std::vector<T>::iterator`)
+				# don't expand the defaults. Output is valid C++ and matches
+				# the native result for non-STL types.
+				#
+				# @parameter policy [PrintingPolicy] The printing policy to use. Ignored by the shim.
 				# @parameter with_global_ns_prefix [Boolean] Whether to prepend "::".
 				# @returns [String] The fully qualified type name.
-				def fully_qualified_name(policy, with_global_ns_prefix: false)
-					Lib.extract_string Lib.get_fully_qualified_name(@type, policy, with_global_ns_prefix ? 1 : 0)
+				def fully_qualified_name(policy = nil, with_global_ns_prefix: false)
+					if Lib.respond_to?(:get_fully_qualified_name)
+						Lib.extract_string Lib.get_fully_qualified_name(@type, policy, with_global_ns_prefix ? 1 : 0)
+					else
+						result = fqn_impl(policy)
+						with_global_ns_prefix ? "::#{result}" : result
+					end
+				end
+				
+				# Shim implementation of fully_qualified_name. Recursively walks the
+				# type tree, dispatching by kind. Public so it can be invoked across
+				# Type subclass boundaries during recursion.
+				# @parameter policy [PrintingPolicy] Threaded for native API parity; ignored.
+				# @returns [String] The fully qualified type spelling.
+				def fqn_impl(policy)
+					case self.kind
+					when :type_lvalue_ref
+						"#{self.non_reference_type.fqn_impl(policy)} &"
+					when :type_rvalue_ref
+						"#{self.non_reference_type.fqn_impl(policy)} &&"
+					when :type_pointer
+						fqn_pointer(policy)
+					when :type_constant_array
+						"#{self.element_type.fqn_impl(policy)}[#{self.size}]"
+					when :type_incomplete_array
+						"#{self.element_type.fqn_impl(policy)}[]"
+					when :type_elaborated
+						fqn_elaborated(policy)
+					when :type_record
+						fqn_record
+					else
+						self.spelling
+					end
+				end
+				
+				# Spell a pointer type and its qualifier chain. Function pointers
+				# get a single rendering with parameter list; data pointers walk
+				# the chain collecting `*`/`*const` parts and qualify the leaf
+				# child once. Output matches native fqn: `int **`, `const char *const`, etc.
+				# @parameter policy [PrintingPolicy] Threaded to recursive fqn_impl calls.
+				# @returns [String] The fully qualified pointer type spelling.
+				def fqn_pointer(policy)
+					pointee = self.pointee
+					
+					if [:type_function_proto, :type_function_no_proto].include?(pointee.kind)
+						ptr_const = self.const_qualified? ? " const" : ""
+						result_type = pointee.result_type.fqn_impl(policy)
+						arg_types = pointee.arg_types.map{|arg_type| arg_type.fqn_impl(policy)}.join(", ")
+						return "#{result_type} (*#{ptr_const})(#{arg_types})"
+					end
+					
+					parts = []
+					current = self
+					while current.kind == :type_pointer
+						inner = current.pointee
+						break if [:type_function_proto, :type_function_no_proto].include?(inner.kind)
+						
+						parts << (current.const_qualified? ? "*const" : "*")
+						current = inner
+					end
+					
+					"#{current.fqn_impl(policy)} #{parts.reverse.join}"
+				end
+				
+				# Spell an elaborated type (typedef / type alias / enum / class)
+				# preserving the alias name where appropriate and qualifying
+				# template arguments recursively.
+				# @parameter policy [PrintingPolicy] Threaded to recursive calls.
+				# @returns [String] The fully qualified elaborated type spelling.
+				def fqn_elaborated(policy)
+					decl = self.declaration
+					const_prefix = self.const_qualified? ? "const " : ""
+					
+					case decl.kind
+					when :cursor_typedef_decl, :cursor_type_alias_decl
+						# Preserve the typedef/alias name and qualify with namespace.
+						spelling = self.unqualified_type.spelling
+						qualified = decl.qualified_name
+						
+						if spelling.include?("::")
+							# Already partially qualified. For nested typedefs in
+							# template classes (e.g., std::vector<Pixel>::iterator),
+							# qualify template args using the parent type's fqn.
+							parent = decl.semantic_parent
+							if parent.kind == :cursor_class_decl || parent.kind == :cursor_struct
+								parent_type = parent.type
+								parent_fqn = parent_type.fqn_impl(policy)
+								member_name = decl.spelling
+								"#{const_prefix}#{parent_fqn}::#{member_name}"
+							else
+								"#{const_prefix}#{spelling}"
+							end
+						elsif qualified
+							"#{const_prefix}#{qualified}"
+						else
+							"#{const_prefix}#{spelling}"
+						end
+						
+					when :cursor_enum_decl
+						"#{const_prefix}#{decl.qualified_name}"
+						
+					else
+						# Alias-template detection: e.g. `AliasOptional<int>` -> `Optional<int>`.
+						# The elaborated spelling preserves the alias; fqn_record
+						# would resolve to the underlying type. Use spelling when
+						# it's already qualified.
+						unqual = self.unqualified_type.spelling
+						if unqual.include?("::") && decl.spelling != unqual.sub(/<.*/, "").split("::").last
+							"#{const_prefix}#{unqual}"
+						else
+							base = fqn_record
+							if self.const_qualified? && !base.start_with?("const ")
+								"const #{base}"
+							else
+								base
+							end
+						end
+					end
+				end
+				
+				# Spell a record type (class/struct) using its declaration's
+				# type spelling, which suppresses inline namespaces and includes
+				# template args. Falls back to qualified_name + spelling args
+				# for dependent types.
+				# @returns [String] The fully qualified record type spelling.
+				def fqn_record
+					decl = self.declaration
+					return self.spelling if decl.kind == :cursor_no_decl_found
+					
+					const_prefix = self.const_qualified? ? "const " : ""
+					
+					# decl.type.spelling gives the right qualification (no inline
+					# ns, with template args).
+					decl_spelling = decl.type.spelling
+					if decl_spelling && !decl_spelling.empty? && decl_spelling.include?("::")
+						# For concrete template types, recursively qualify args.
+						n = self.num_template_arguments
+						if n > 0
+							base = decl_spelling.sub(/<.*/, "")
+							template_args = fqn_template_args(nil)
+							"#{const_prefix}#{base}#{template_args}"
+						else
+							"#{const_prefix}#{decl_spelling}"
+						end
+					else
+						# Fallback for types where decl.type.spelling is unqualified.
+						qualified = decl.qualified_name
+						bare_spelling = self.unqualified_type.spelling
+						template_args = bare_spelling.include?("<") ? bare_spelling[/<.*/] : ""
+						"#{const_prefix}#{qualified}#{template_args}"
+					end
+				end
+				
+				# Build the qualified template argument list by recursing into
+				# each type argument. Non-type template parameters (e.g.
+				# integral values) are recovered from the type's spelling.
+				# @parameter policy [PrintingPolicy] Threaded to recursive calls.
+				# @returns [String] The bracketed argument list, including angle brackets, or empty.
+				def fqn_template_args(policy)
+					n = self.num_template_arguments
+					return "" unless n > 0
+					
+					# Extract original args from spelling for non-type template params.
+					spelling_args = parse_template_args_from_spelling
+					
+					args = (0...n).map do |i|
+						arg_type = self.template_argument_type(i)
+						if arg_type.kind == :type_invalid
+							# Non-type template arg (e.g., int N=3) — use from spelling.
+							spelling_args ? spelling_args[i] : nil
+						else
+							arg_type.fqn_impl(policy)
+						end
+					end.compact
+					
+					return "" if args.empty?
+					"<#{args.join(", ")}>"
+				end
+				
+				# Parse template arguments from the type's unqualified spelling,
+				# respecting nested angle brackets. Used to recover non-type
+				# template arguments that libclang surfaces only as text.
+				# @returns [Array(String) | nil] The argument substrings, or nil if no `<` was found.
+				def parse_template_args_from_spelling
+					bare = self.unqualified_type.spelling
+					start = bare.index("<")
+					return nil unless start
+					
+					depth = 0
+					args = []
+					current = +""
+					bare[start + 1..].each_char do |c|
+						case c
+						when "<"
+							depth += 1
+							current << c
+						when ">"
+							if depth == 0
+								args << current.strip unless current.strip.empty?
+								break
+							else
+								depth -= 1
+								current << c
+							end
+						when ","
+							if depth == 0
+								args << current.strip
+								current = +""
+							else
+								current << c
+							end
+						else
+							current << c
+						end
+					end
+					args
 				end
 				
 				# Visit all base classes of a C++ record type.
