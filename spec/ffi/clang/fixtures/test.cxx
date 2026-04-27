@@ -40,6 +40,8 @@ void f_variadic(int a, ...);
 void f_non_variadic(int a, char b, long c);
 
 typedef int const* const_int_ptr;
+typedef int** int_pp;
+void takesPtrRefs(int*& pRef, int**& ppRef);
 int int_array[8];
 
 struct RefQualifier {
