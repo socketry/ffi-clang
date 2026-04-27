@@ -189,6 +189,17 @@ module FFI
 					self.non_reference_type.declaration.copyable?
 				end
 				
+				# Check if this type's declaration (after reference stripping)
+				# has an accessible copy assignment operator and copy-assignable
+				# bases. Returns true for non-class types (fundamentals, pointers,
+				# enums) and for types whose declaration is unavailable
+				# (:cursor_no_decl_found).
+				#
+				# @returns [Boolean] True if instances of this type can be copy-assigned.
+				def copy_assignable?
+					self.non_reference_type.declaration.copy_assignable?
+				end
+				
 				# Get the type of a template argument at the given index.
 				# For template specializations (e.g., `std::vector<int>`), this returns the type of
 				# the template argument at the specified position.

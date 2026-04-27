@@ -350,6 +350,38 @@ describe FFI::Clang::Types::Type do
 		end
 	end
 	
+	describe "#copy_assignable?" do
+		let(:cursor_types) {Index.new.parse_translation_unit(fixture_path("types.cxx")).cursor}
+		
+		it "returns true for a copy-assignable struct type" do
+			type = find_matching(cursor_types) do |child, parent|
+				child.kind == :cursor_struct and child.spelling == "SimpleStruct"
+			end.type
+			expect(type.copy_assignable?).to be true
+		end
+		
+		it "returns false for a struct type with deleted copy assignment operator" do
+			type = find_matching(cursor_types) do |child, parent|
+				child.kind == :cursor_struct and child.spelling == "DeletedAssign"
+			end.type
+			expect(type.copy_assignable?).to be false
+		end
+		
+		it "returns false for a class type with protected copy assignment operator" do
+			type = find_matching(cursor_types) do |child, parent|
+				child.kind == :cursor_class_decl and child.spelling == "ProtectedAssign"
+			end.type
+			expect(type.copy_assignable?).to be false
+		end
+		
+		it "returns true for a fundamental type" do
+			int_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_field_decl and child.spelling == "int_member_a"
+			end.type
+			expect(int_type.copy_assignable?).to be true
+		end
+	end
+	
 	describe "#const_qualified?" do
 		let(:pointer_type) do
 			find_matching(cursor_cxx) do |child, parent|

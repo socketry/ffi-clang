@@ -814,9 +814,9 @@ module FFI
 			end
 			
 			# Check if this class/struct is copyable: it has no inaccessible
-			# (deleted or private) copy constructor, and every base class is
-			# copyable (recursively). Returns true on cursors that don't denote
-			# a class/struct, since the question doesn't apply.
+			# (deleted, private, or protected) copy constructor, and every base
+			# class is copyable (recursively). Returns true on cursors that
+			# don't denote a class/struct, since the question doesn't apply.
 			#
 			# A class with no explicit copy constructor is treated as copyable —
 			# the implicit one is generated. We only flag explicit `= delete` or
@@ -828,13 +828,41 @@ module FFI
 				
 				copy_constructors = self.find_by_kind(false, :cursor_constructor).select(&:copy_constructor?)
 				copy_constructors.each do |constructor|
-					return false if constructor.deleted? || constructor.private?
+					return false if constructor.deleted? || constructor.private? || constructor.protected?
 				end
 				
 				self.find_by_kind(false, :cursor_cxx_base_specifier).each do |base|
 					base_decl = base.type.declaration
 					next if base_decl.kind == :cursor_no_decl_found
 					return false unless base_decl.copyable?
+				end
+				
+				true
+			end
+			
+			# Check if this class/struct is copy-assignable: it has no
+			# inaccessible (deleted, private, or protected) copy assignment
+			# operator, and every base class is copy-assignable (recursively).
+			# Returns true on cursors that don't denote a class/struct, since
+			# the question doesn't apply.
+			#
+			# A class with no explicit copy assignment operator is treated as
+			# copy-assignable — the implicit one is generated. We only flag
+			# explicit `= delete` or private/protected access.
+			#
+			# @returns [Boolean] True if instances of this type can be copy-assigned.
+			def copy_assignable?
+				return true unless [:cursor_class_decl, :cursor_struct].include?(self.kind)
+				
+				copy_assignment_operators = self.find_by_kind(false, :cursor_cxx_method).select(&:copy_assignment_operator?)
+				copy_assignment_operators.each do |operator|
+					return false if operator.deleted? || operator.private? || operator.protected?
+				end
+				
+				self.find_by_kind(false, :cursor_cxx_base_specifier).each do |base|
+					base_decl = base.type.declaration
+					next if base_decl.kind == :cursor_no_decl_found
+					return false unless base_decl.copy_assignable?
 				end
 				
 				true

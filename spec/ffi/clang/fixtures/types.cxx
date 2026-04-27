@@ -62,6 +62,42 @@ struct InheritsDeletedCopy : public DeletedCopy {
 	int value;
 };
 
+// Protected copy constructor — not copyable from external code.
+class ProtectedCopy {
+protected:
+	ProtectedCopy(const ProtectedCopy&);
+public:
+	ProtectedCopy();
+};
+
+// Deleted copy assignment operator — not copy-assignable.
+struct DeletedAssign {
+	DeletedAssign() = default;
+	DeletedAssign(const DeletedAssign&) = default;
+	DeletedAssign& operator=(const DeletedAssign&) = delete;
+};
+
+// Private copy assignment operator — not copy-assignable.
+class PrivateAssign {
+public:
+	PrivateAssign();
+private:
+	PrivateAssign& operator=(const PrivateAssign&);
+};
+
+// Protected copy assignment operator — not copy-assignable from external code.
+class ProtectedAssign {
+public:
+	ProtectedAssign() = default;
+protected:
+	ProtectedAssign& operator=(const ProtectedAssign&) = default;
+};
+
+// Inherits from a non-copy-assignable base — not transitively copy-assignable.
+struct InheritsDeletedAssign : public DeletedAssign {
+	int value;
+};
+
 // Explicit constructor
 struct ExplicitCtor {
 	explicit ExplicitCtor(int x);
