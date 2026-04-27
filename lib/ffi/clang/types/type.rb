@@ -127,7 +127,14 @@ module FFI
 				
 				# Get the type with all qualifiers (const, volatile, restrict) removed.
 				# @returns [Type] The unqualified type.
+				#
+				# Guards against :type_invalid input: clang_getUnqualifiedType has
+				# no null check on the underlying QualType (unlike its siblings
+				# clang_getNonReferenceType / clang_getCanonicalType / etc.) and
+				# segfaults on invalid types. Returning self preserves the
+				# invalid kind without entering libclang.
 				def unqualified_type
+					return self if self.kind == :type_invalid
 					Type.create Lib.get_unqualified_type(@type), @translation_unit
 				end
 				

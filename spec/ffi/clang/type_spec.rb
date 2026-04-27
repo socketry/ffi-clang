@@ -164,6 +164,21 @@ describe FFI::Clang::Types::Type do
 			expect(int_type.const_qualified?).to be false
 			expect(int_type.unqualified_type.kind).to eq(int_type.kind)
 		end
+		
+		# clang_getUnqualifiedType has no null check for the underlying QualType
+		# (unlike its siblings like clang_getNonReferenceType), so calling it on
+		# CXType_Invalid segfaults inside libclang. ffi-clang must guard against
+		# this — invalid input should yield an invalid output, not a crash.
+		it "returns an invalid type without crashing on a type_invalid input" do
+			invalid_cxtype = FFI::Clang::Lib::CXType.new
+			# Fresh CXType has kind = 0 = :type_invalid
+			invalid_type = FFI::Clang::Types::Type.new(invalid_cxtype, nil)
+			expect(invalid_type.kind).to eq(:type_invalid)
+			
+			result = invalid_type.unqualified_type
+			expect(result).to be_kind_of(Types::Type)
+			expect(result.kind).to eq(:type_invalid)
+		end
 	end
 	
 	describe "#const_qualified?" do
