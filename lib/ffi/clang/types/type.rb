@@ -138,6 +138,12 @@ module FFI
 					Type.create Lib.get_unqualified_type(@type), @translation_unit
 				end
 				
+				# True if this type is an lvalue or rvalue reference.
+				# @returns [Boolean] Whether this type is `T &` or `T &&`.
+				def reference?
+					self.kind == :type_lvalue_ref || self.kind == :type_rvalue_ref
+				end
+				
 				# Get the non-reference type.
 				# For reference types, returns the type that is being referenced.
 				# @returns [Type] The non-reference type.

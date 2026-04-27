@@ -142,6 +142,39 @@ describe FFI::Clang::Types::Type do
 		end
 	end
 	
+	describe "#reference?" do
+		it "returns true for an lvalue reference" do
+			ref_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_cxx_method and child.spelling == "takesARef"
+			end.type.arg_types.to_a[0]
+			expect(ref_type.kind).to eq(:type_lvalue_ref)
+			expect(ref_type.reference?).to be true
+		end
+		
+		it "returns true for an rvalue reference" do
+			ref_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_cxx_method and child.spelling == "takesARef"
+			end.type.arg_types.to_a[1]
+			expect(ref_type.kind).to eq(:type_rvalue_ref)
+			expect(ref_type.reference?).to be true
+		end
+		
+		it "returns false for a non-reference type" do
+			int_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_field_decl and child.spelling == "int_member_a"
+			end.type
+			expect(int_type.reference?).to be false
+		end
+		
+		it "returns false for a pointer type" do
+			ptr_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_typedef_decl and child.spelling == "const_int_ptr"
+			end.type.canonical
+			expect(ptr_type.kind).to eq(:type_pointer)
+			expect(ptr_type.reference?).to be false
+		end
+	end
+	
 	describe "#non_reference_type" do
 		# clang_getNonReferenceType dereferences the underlying QualType
 		# without a null check, so calling it on CXType_Invalid segfaults
