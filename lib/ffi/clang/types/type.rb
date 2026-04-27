@@ -178,6 +178,17 @@ module FFI
 					type.unqualified_type
 				end
 				
+				# Check if this type's declaration (after reference stripping)
+				# has an accessible copy constructor and copyable bases.
+				# Returns true for non-class types (fundamentals, pointers,
+				# enums) and for types whose declaration is unavailable
+				# (:cursor_no_decl_found).
+				#
+				# @returns [Boolean] True if instances of this type can be copied.
+				def copyable?
+					self.non_reference_type.declaration.copyable?
+				end
+				
 				# Get the type of a template argument at the given index.
 				# For template specializations (e.g., `std::vector<int>`), this returns the type of
 				# the template argument at the specified position.

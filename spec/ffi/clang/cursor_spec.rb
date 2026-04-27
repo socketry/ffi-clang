@@ -1463,6 +1463,55 @@ describe FFI::Clang::Cursor do
 		end
 	end
 	
+	describe "#copyable?" do
+		let(:simple_struct) do
+			find_matching(cursor_types) do |child, parent|
+				child.kind == :cursor_struct and child.spelling == "SimpleStruct"
+			end
+		end
+		
+		let(:deleted_copy) do
+			find_matching(cursor_types) do |child, parent|
+				child.kind == :cursor_struct and child.spelling == "DeletedCopy"
+			end
+		end
+		
+		let(:private_copy) do
+			find_matching(cursor_types) do |child, parent|
+				child.kind == :cursor_class_decl and child.spelling == "PrivateCopy"
+			end
+		end
+		
+		let(:inherits_deleted_copy) do
+			find_matching(cursor_types) do |child, parent|
+				child.kind == :cursor_struct and child.spelling == "InheritsDeletedCopy"
+			end
+		end
+		
+		it "returns true for a struct with implicit copy constructor" do
+			expect(simple_struct.copyable?).to be true
+		end
+		
+		it "returns false for a struct with deleted copy constructor" do
+			expect(deleted_copy.copyable?).to be false
+		end
+		
+		it "returns false for a class with private copy constructor" do
+			expect(private_copy.copyable?).to be false
+		end
+		
+		it "returns false transitively when a base class is not copyable" do
+			expect(inherits_deleted_copy.copyable?).to be false
+		end
+		
+		it "returns true on a non-class cursor" do
+			func = find_matching(cursor_types) do |child, parent|
+				child.kind == :cursor_function and child.spelling == "binary_operator_func"
+			end
+			expect(func.copyable?).to be true
+		end
+	end
+	
 	describe "#copy_assignment_operator?" do
 		let(:copy_assign) do
 			find_matching(cursor_types) do |child, parent|
