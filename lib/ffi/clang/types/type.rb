@@ -141,7 +141,13 @@ module FFI
 				# Get the non-reference type.
 				# For reference types, returns the type that is being referenced.
 				# @returns [Type] The non-reference type.
+				#
+				# Guards against :type_invalid input: clang_getNonReferenceType
+				# dereferences the underlying QualType without a null check and
+				# segfaults on invalid types. Returning self preserves the
+				# invalid kind without entering libclang.
 				def non_reference_type
+					return self if self.kind == :type_invalid
 					Type.create Lib.get_non_reference_type(@type), @translation_unit
 				end
 				

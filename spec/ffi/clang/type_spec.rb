@@ -142,6 +142,23 @@ describe FFI::Clang::Types::Type do
 		end
 	end
 	
+	describe "#non_reference_type" do
+		# clang_getNonReferenceType dereferences the underlying QualType
+		# without a null check, so calling it on CXType_Invalid segfaults
+		# inside libclang. ffi-clang must guard against this — invalid input
+		# should yield an invalid output, not a crash.
+		it "returns an invalid type without crashing on a type_invalid input" do
+			invalid_cxtype = FFI::Clang::Lib::CXType.new
+			# Fresh CXType has kind = 0 = :type_invalid
+			invalid_type = FFI::Clang::Types::Type.new(invalid_cxtype, nil)
+			expect(invalid_type.kind).to eq(:type_invalid)
+			
+			result = invalid_type.non_reference_type
+			expect(result).to be_kind_of(Types::Type)
+			expect(result.kind).to eq(:type_invalid)
+		end
+	end
+	
 	describe "#unqualified_type" do
 		let(:const_type) do
 			find_matching(cursor_cxx) do |child, parent|
