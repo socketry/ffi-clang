@@ -151,6 +151,27 @@ module FFI
 					Type.create Lib.get_non_reference_type(@type), @translation_unit
 				end
 				
+				# Get the intrinsic type — strip the reference, follow pointer
+				# indirection until reaching a non-pointer type, then drop
+				# cv-qualifiers. Named after Rice's `intrinsic_type` metafunction
+				# of the same shape. Useful when asking "what does this type
+				# ultimately denote?" for skip-list and bindability checks.
+				#
+				# Examples:
+				# * `T &`        becomes `T`
+				# * `T *`        becomes `T`
+				# * `T **&`      becomes `T`
+				# * `const T &`  becomes `T`
+				#
+				# @returns [Type] The intrinsic (innermost, unqualified) type.
+				def intrinsic_type
+					type = self.non_reference_type
+					while type.kind == :type_pointer
+						type = type.pointee
+					end
+					type.unqualified_type
+				end
+				
 				# Get the type of a template argument at the given index.
 				# For template specializations (e.g., `std::vector<int>`), this returns the type of
 				# the template argument at the specified position.

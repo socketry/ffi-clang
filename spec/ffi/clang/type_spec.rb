@@ -198,6 +198,90 @@ describe FFI::Clang::Types::Type do
 		end
 	end
 	
+	describe "#intrinsic_type" do
+		it "strips an lvalue reference" do
+			ref_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_cxx_method and child.spelling == "takesARef"
+			end.type.arg_types.to_a[0]
+			expect(ref_type.kind).to eq(:type_lvalue_ref)
+			
+			intrinsic = ref_type.intrinsic_type
+			expect(intrinsic.kind).to eq(:type_int)
+		end
+		
+		it "strips an rvalue reference" do
+			ref_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_cxx_method and child.spelling == "takesARef"
+			end.type.arg_types.to_a[1]
+			expect(ref_type.kind).to eq(:type_rvalue_ref)
+			
+			intrinsic = ref_type.intrinsic_type
+			expect(intrinsic.kind).to eq(:type_float)
+		end
+		
+		it "follows a single pointer and drops cv-qualifiers" do
+			# const_int_ptr is `int const *`; intrinsic_type should yield `int`.
+			ptr_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_typedef_decl and child.spelling == "const_int_ptr"
+			end.type.canonical
+			expect(ptr_type.kind).to eq(:type_pointer)
+			
+			intrinsic = ptr_type.intrinsic_type
+			expect(intrinsic.kind).to eq(:type_int)
+			expect(intrinsic.const_qualified?).to be false
+		end
+		
+		it "follows a pointer-to-pointer chain" do
+			# int_pp is `int **`; intrinsic_type should yield `int`.
+			pp_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_typedef_decl and child.spelling == "int_pp"
+			end.type.canonical
+			expect(pp_type.kind).to eq(:type_pointer)
+			
+			intrinsic = pp_type.intrinsic_type
+			expect(intrinsic.kind).to eq(:type_int)
+		end
+		
+		it "strips a reference to a pointer" do
+			# takesPtrRefs(int*& pRef, ...) — first arg is `int *&`.
+			arg_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_function and child.spelling == "takesPtrRefs"
+			end.type.arg_types.to_a[0]
+			expect(arg_type.kind).to eq(:type_lvalue_ref)
+			
+			intrinsic = arg_type.intrinsic_type
+			expect(intrinsic.kind).to eq(:type_int)
+		end
+		
+		it "strips a reference to a pointer-to-pointer" do
+			# takesPtrRefs(..., int**& ppRef) — second arg is `int **&`.
+			arg_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_function and child.spelling == "takesPtrRefs"
+			end.type.arg_types.to_a[1]
+			expect(arg_type.kind).to eq(:type_lvalue_ref)
+			
+			intrinsic = arg_type.intrinsic_type
+			expect(intrinsic.kind).to eq(:type_int)
+		end
+		
+		it "returns the unchanged kind for a fundamental type" do
+			int_type = find_matching(cursor_cxx) do |child, parent|
+				child.kind == :cursor_field_decl and child.spelling == "int_member_a"
+			end.type
+			expect(int_type.kind).to eq(:type_int)
+			expect(int_type.intrinsic_type.kind).to eq(:type_int)
+		end
+		
+		it "returns an invalid type without crashing on a type_invalid input" do
+			invalid_cxtype = FFI::Clang::Lib::CXType.new
+			invalid_type = FFI::Clang::Types::Type.new(invalid_cxtype, nil)
+			expect(invalid_type.kind).to eq(:type_invalid)
+			
+			result = invalid_type.intrinsic_type
+			expect(result.kind).to eq(:type_invalid)
+		end
+	end
+	
 	describe "#const_qualified?" do
 		let(:pointer_type) do
 			find_matching(cursor_cxx) do |child, parent|
