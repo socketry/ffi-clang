@@ -10,6 +10,6 @@
 module FFI
 	# @namespace
 	module Clang
-		VERSION = "0.15.2"
+		VERSION = "0.15.1"
 	end
 end

@@ -1,17 +1,12 @@
 # Releases
 
-## v0.15.2
-
-### New APIs
+## Unreleased
 
   - Add {ruby FFI::Clang::Types::Type\#intrinsic_type}, which strips references and follows pointer indirection until reaching a non-pointer type and then drops cv-qualifiers. 
   - Add {ruby FFI::Clang::Types::Type\#reference?}, a one-liner predicate over `:type_lvalue_ref` and `:type_rvalue_ref`. 
   - Add {ruby FFI::Clang::Cursor\#copyable?} and {ruby FFI::Clang::Types::Type\#copyable?}, predicates that return true when a class/struct has an accessible copy constructor (none deleted, private, or protected) and every base class is copyable.
   - Add {ruby FFI::Clang::Cursor\#copy_assignable?} and {ruby FFI::Clang::Types::Type\#copy_assignable?}, predicates that return true when a class/struct has an accessible copy assignment operator (none deleted, private, or protected) and every base class is copy-assignable.
   - {ruby FFI::Clang::Types::Type\#fully_qualified_name} now works on libclang versions earlier than 21 via a Ruby shim that composes existing libclang APIs (declaration, qualified_name, template arguments, pointer/array/reference unwrapping). 
-
-### Bug Fixes
-
   - Guard {ruby FFI::Clang::Types::Type\#unqualified_type} against `:type_invalid` input. 
   - Guard {ruby FFI::Clang::Types::Type\#non_reference_type} against `:type_invalid` input. 
 
