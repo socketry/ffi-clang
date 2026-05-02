@@ -41,6 +41,76 @@ For example, to use a specific LLVM installation:
 
 Please see the [project releases](https://socketry.github.io/ffi-clang/releases/index) for all releases.
 
+### v0.16.0
+
+  - Add <code class="language-ruby">FFI::Clang::Types::Type\#intrinsic\_type</code>, which strips references and follows pointer indirection until reaching a non-pointer type and then drops cv-qualifiers.
+  - Add <code class="language-ruby">FFI::Clang::Types::Type\#reference?</code>, a one-liner predicate over `:type_lvalue_ref` and `:type_rvalue_ref`.
+  - Add <code class="language-ruby">FFI::Clang::Cursor\#copyable?</code> and <code class="language-ruby">FFI::Clang::Types::Type\#copyable?</code>, predicates that return true when a class/struct has an accessible copy constructor (none deleted, private, or protected) and every base class is copyable.
+  - Add <code class="language-ruby">FFI::Clang::Cursor\#copy\_assignable?</code> and <code class="language-ruby">FFI::Clang::Types::Type\#copy\_assignable?</code>, predicates that return true when a class/struct has an accessible copy assignment operator (none deleted, private, or protected) and every base class is copy-assignable.
+  - <code class="language-ruby">FFI::Clang::Types::Type\#fully\_qualified\_name</code> now works on libclang versions earlier than 21 via a Ruby shim that composes existing libclang APIs (declaration, qualified\_name, template arguments, pointer/array/reference unwrapping).
+  - Guard <code class="language-ruby">FFI::Clang::Types::Type\#unqualified\_type</code> against `:type_invalid` input.
+  - Guard <code class="language-ruby">FFI::Clang::Types::Type\#non\_reference\_type</code> against `:type_invalid` input.
+
+### v0.15.1
+
+  - Use `-isystem` instead of `-I` for auto-discovered MSVC system include paths so that `in_system_header?` correctly identifies system headers.
+
+### v0.15.0
+
+  - [Platform Support](https://socketry.github.io/ffi-clang/releases/index#platform-support)
+  - [Breaking Changes](https://socketry.github.io/ffi-clang/releases/index#breaking-changes)
+  - [Bug Fixes](https://socketry.github.io/ffi-clang/releases/index#bug-fixes)
+  - [New APIs](https://socketry.github.io/ffi-clang/releases/index#new-apis)
+
+### v0.14.0
+
+  - Helper method that returns a cursor's <code class="language-ruby">FFI::Clang::Cursor\#qualified\_display\_name</code>.
+  - Add release notes and documentation tooling.
+  - Modernize code and achieve 100% documentation coverage.
+  - Update minimum Ruby version to 3.2.
+
+### v0.13.0
+
+  - Add support for `clang_Type_getNamedType`. (\#90)
+  - Try clang v18 + add Ruby v3.4 to test matrix. (\#91)
+
+### v0.12.0
+
+  - Prefer `LIBCLANG` and `LLVM_CONFIG` overrides over Xcode. (\#88)
+
+### v0.11.0
+
+  - Restore `visit_children` method. Fixes \#82. (\#84)
+  - Expose Clang's exception specification API. (\#87)
+  - Support iterating over `Type::Function` args and expose `Lib.get_non_reference_type`. (\#85)
+  - Fix qualified name. (\#83)
+  - Update clang version. (\#86)
+
+### v0.10.0
+
+  - Expose libclang's anonymous methods. (\#79)
+  - Use Enumerable. (\#80)
+  - Split `FFI::Clang::Type` into a number of more cohesive subclasses inheriting from `FFI::Clang::Types::Type`. (\#81)
+
+### v0.9.0
+
+  - Remove duplicate mapping of `clang_getEnumDeclIntegerType`. (\#67)
+  - Update bitmask options based on enums to always be an array of symbols. (\#69)
+  - Add support for `parse_translation_unit2` API. (\#70)
+  - Cursor improvements, Type improvements, Printing support. (\#72)
+  - Fix finalizer exception in `FFI::Clang::CodeCompletion::Results`. (\#74)
+  - Fix Clang 16 compatibility. (\#76)
+  - Cursor location methods. (\#78)
+
+### v0.8.0
+
+  - Modernize gem. (\#58)
+  - Test on clang 5.0+. (\#59)
+  - Fix `CXCursor_TranslationUnit` enum value to 350. (\#61)
+  - Add `Cursor#hash` and `Cursor#eql?`. (\#62)
+  - Set `cursor_translation_unit` enum value based on the Clang version. (\#64)
+  - Add various C++ introspection methods. (\#66)
+
 ## Contributing
 
 We welcome contributions to this project.
